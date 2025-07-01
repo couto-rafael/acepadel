@@ -68,19 +68,20 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; requireAuth?: boolea
 function AppContent() {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (!loading && user && profile) {
-      // Redirect authenticated users from home page
-      if (window.location.pathname === '/') {
+      // Only redirect from home page if user is authenticated
+      if (location.pathname === '/') {
         if (profile.user_type === 'club') {
-          navigate('/club-dashboard');
+          navigate('/club-dashboard', { replace: true });
         } else {
-          navigate('/dashboard');
+          navigate('/dashboard', { replace: true });
         }
       }
     }
-  }, [user, profile, loading, navigate]);
+  }, [user, profile, loading, navigate, location.pathname]);
 
   if (loading) {
     return (

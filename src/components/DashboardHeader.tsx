@@ -84,6 +84,24 @@ const DashboardHeader: React.FC = () => {
     }
   };
 
+  const handleDashboardClick = () => {
+    setIsDashboardMenuOpen(false);
+    if (isClub) {
+      navigate('/club-dashboard');
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
+  const handleProfileClick = () => {
+    setIsProfileMenuOpen(false);
+    if (isClub) {
+      navigate('/club-profile');
+    } else {
+      navigate('/profile');
+    }
+  };
+
   const mockNotifications = [
     {
       id: 1,
@@ -143,9 +161,12 @@ const DashboardHeader: React.FC = () => {
                     className="absolute mt-2 w-48 bg-white rounded-lg shadow-xl py-1 z-50 border border-gray-100 animate-fade-in"
                     onMouseLeave={() => setIsDashboardMenuOpen(false)}
                   >
-                    <Link to={isClub ? "/club-dashboard" : "/dashboard"} className="block px-4 py-2 text-sm text-dark-700 hover:bg-accent-50 hover:text-primary-900 transition-colors">
+                    <button 
+                      onClick={handleDashboardClick}
+                      className="block w-full text-left px-4 py-2 text-sm text-dark-700 hover:bg-accent-50 hover:text-primary-900 transition-colors"
+                    >
                       {isClub ? 'Painel do Clube' : 'Feed'}
-                    </Link>
+                    </button>
                     {!isClub && (
                       <Link to="/clubs" className="block px-4 py-2 text-sm text-dark-700 hover:bg-accent-50 hover:text-primary-900 transition-colors">
                         Clubes
@@ -235,6 +256,12 @@ const DashboardHeader: React.FC = () => {
               )}
             </div>
 
+            {!isClub && (
+              <button className="text-dark-700 hover:text-primary-900 px-4 py-2 rounded-lg border border-gray-300 hover:border-primary-300 transition-all font-medium">
+                Convide Amigo
+              </button>
+            )}
+
             <div className="relative flex items-center" ref={notificationsRef}>
               <button 
                 className="text-dark-600 hover:text-primary-900 relative transition-colors"
@@ -321,10 +348,13 @@ const DashboardHeader: React.FC = () => {
                       Encontre Atletas
                     </Link>
                   )}
-                  <Link to={isClub ? "/club-profile" : "/profile"} className="flex items-center px-4 py-2 text-sm text-dark-700 hover:bg-accent-50 hover:text-primary-900 transition-colors">
+                  <button
+                    onClick={handleProfileClick}
+                    className="flex items-center w-full text-left px-4 py-2 text-sm text-dark-700 hover:bg-accent-50 hover:text-primary-900 transition-colors"
+                  >
                     <User size={16} className="mr-2" />
                     {isClub ? 'Perfil do Clube' : 'Meu Perfil'}
-                  </Link>
+                  </button>
                   <button
                     onClick={handleSettingsClick}
                     className="flex items-center w-full px-4 py-2 text-sm text-dark-700 hover:bg-accent-50 hover:text-primary-900 transition-colors"
