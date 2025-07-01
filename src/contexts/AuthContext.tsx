@@ -1,13 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
-import { supabase, Profile, getCurrentUser, getProfile } from '../lib/supabase';
+import { User, Profile, getCurrentUser, getCurrentProfile, signOut as authSignOut } from '../lib/auth';
 
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  refreshProfile: () => Promise<void>;
+  refreshProfile: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,50 +24,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refreshProfile = async () => {
-    if (user) {
-      const { data } = await getProfile(user.id);
-      setProfile(data);
-    }
+  const refreshProfile = () => {
+    const currentUser = getCurrentUser();
+    const currentProfile = getCurrentProfile();
+    setUser(currentUser);
+    setProfile(currentProfile);
   };
 
   useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
-      const { user: currentUser } = await getCurrentUser();
-      setUser(currentUser);
-      
-      if (currentUser) {
-        const { data } = await getProfile(currentUser.id);
-        setProfile(data);
-      }
-      
-      setLoading(false);
+    // Carregar dados do usuário do localStorage
+    refreshProfile();
+    setLoading(false);
+
+    // Escutar mudanças no localStorage (para sincronizar entre abas)
+    const handleStorageChange = () => {
+      refreshProfile();
     };
 
-    getInitialSession();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          const { data } = await getProfile(session.user.id);
-          setProfile(data);
-        } else {
-          setProfile(null);
-        }
-        
-        setLoading(false);
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []); // Changed from [user] to [] to prevent re-running the effect
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await authSignOut();
     setUser(null);
     setProfile(null);
   };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Mail, Lock, Eye, EyeOff, User, Building2, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { signIn, signUp } from '../lib/supabase';
+import { signIn, signUp } from '../lib/auth';
 import { useAuth } from '../contexts/AuthContext';
 
 interface LoginModalProps {
@@ -76,54 +76,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       .slice(0, 17);
   };
 
-  const validateEmail = (email: string): boolean => {
-    // More comprehensive email validation
-    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-    
-    // Check basic format
-    if (!emailRegex.test(email)) {
-      return false;
-    }
-    
-    // Additional checks
-    const parts = email.split('@');
-    if (parts.length !== 2) return false;
-    
-    const [localPart, domain] = parts;
-    
-    // Check local part length (before @)
-    if (localPart.length === 0 || localPart.length > 64) return false;
-    
-    // Check domain part
-    if (domain.length === 0 || domain.length > 253) return false;
-    
-    // Check for consecutive dots
-    if (email.includes('..')) return false;
-    
-    // Check if starts or ends with dot
-    if (localPart.startsWith('.') || localPart.endsWith('.')) return false;
-    
-    // Check domain has at least one dot
-    if (!domain.includes('.')) return false;
-    
-    // Check domain doesn't start or end with hyphen
-    const domainParts = domain.split('.');
-    for (const part of domainParts) {
-      if (part.startsWith('-') || part.endsWith('-') || part.length === 0) return false;
-    }
-    
-    return true;
-  };
-
-  const sanitizeEmail = (email: string): string => {
-    // Remove any invisible characters and normalize
-    return email
-      .trim()
-      .toLowerCase()
-      .replace(/[\u200B-\u200D\uFEFF]/g, '') // Remove zero-width characters
-      .replace(/\s+/g, ''); // Remove any whitespace
-  };
-
   const handleClubDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     let formattedValue = value;
@@ -159,116 +111,41 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     setShowForm(true);
   };
 
-  const getErrorMessage = (error: any): string => {
-    if (error?.message) {
-      // Handle specific Supabase error messages
-      if (error.message.includes('Invalid login credentials')) {
-        return 'Email ou senha incorretos. Verifique suas credenciais e tente novamente.';
-      }
-      if (error.message.includes('email_address_invalid') || error.message.includes('Email address') && error.message.includes('invalid')) {
-        return 'O formato do email não é válido. Verifique se o email está correto e tente novamente. Exemplo: usuario@exemplo.com';
-      }
-      if (error.message.includes('User already registered')) {
-        return 'Este email já está cadastrado. Tente fazer login ou use outro email.';
-      }
-      if (error.message.includes('Password should be at least')) {
-        return 'A senha deve ter pelo menos 6 caracteres.';
-      }
-      if (error.message.includes('Email not confirmed')) {
-        return 'Email não confirmado. Verifique sua caixa de entrada e confirme seu email.';
-      }
-      if (error.message.includes('invalid_credentials')) {
-        return 'Credenciais inválidas. Verifique seu email e senha e tente novamente.';
-      }
-      return error.message;
-    }
-    
-    // Handle error objects with code property (Supabase specific)
-    if (error?.code) {
-      if (error.code === 'email_address_invalid') {
-        return 'O formato do email não é válido. Verifique se o email está correto e tente novamente. Exemplo: usuario@exemplo.com';
-      }
-      if (error.code === 'invalid_credentials') {
-        return 'Credenciais inválidas. Verifique seu email e senha e tente novamente.';
-      }
-      if (error.code === 'user_already_exists') {
-        return 'Este email já está cadastrado. Tente fazer login ou use outro email.';
-      }
-      if (error.code === 'weak_password') {
-        return 'A senha deve ter pelo menos 6 caracteres.';
-      }
-    }
-    
-    return 'Ocorreu um erro inesperado. Tente novamente.';
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     
     try {
-      // Sanitize and validate email
-      const sanitizedEmail = sanitizeEmail(email);
-      const trimmedPassword = password.trim();
-      const trimmedConfirmPassword = confirmPassword.trim();
-
-      // Validate email format with enhanced validation
-      if (!validateEmail(sanitizedEmail)) {
-        throw new Error('Por favor, insira um email válido. Exemplo: usuario@exemplo.com');
-      }
-
-      // Additional email format checks
-      if (sanitizedEmail.length < 5) {
-        throw new Error('Email muito curto. Por favor, insira um email válido.');
-      }
-
-      if (sanitizedEmail.length > 254) {
-        throw new Error('Email muito longo. Por favor, insira um email válido.');
-      }
-
-      // Validate password length
-      if (trimmedPassword.length < 6) {
-        throw new Error('A senha deve ter pelo menos 6 caracteres.');
-      }
-
-      if (trimmedPassword.length > 72) {
-        throw new Error('A senha não pode ter mais de 72 caracteres.');
-      }
-
-      if (!isLogin && trimmedPassword !== trimmedConfirmPassword) {
-        throw new Error('As senhas não coincidem');
-      }
-
       if (isLogin) {
         // Login
-        console.log('Attempting login with email:', sanitizedEmail);
-        const { error } = await signIn(sanitizedEmail, trimmedPassword);
-        if (error) {
-          console.error('Login error:', error);
-          throw error;
-        }
-        
-        await refreshProfile();
+        const { user, profile } = await signIn(email, password);
+        refreshProfile();
         onClose();
         
-        // Navigation will be handled by App.tsx based on user type
+        // Navegar para o dashboard apropriado
+        if (profile.user_type === 'club') {
+          navigate('/club-dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
-        // Registration - additional validation for signup
+        // Registration
         if (!userType) {
           throw new Error('Por favor, selecione o tipo de conta.');
         }
 
-        // Validate required fields based on user type
+        if (password !== confirmPassword) {
+          throw new Error('As senhas não coincidem');
+        }
+
+        // Validar campos obrigatórios
         if (userType === 'club') {
           if (!clubData.clubName.trim()) {
             throw new Error('Nome do clube é obrigatório.');
           }
           if (!clubData.cnpj.replace(/\D/g, '')) {
             throw new Error('CNPJ é obrigatório.');
-          }
-          if (clubData.cnpj.replace(/\D/g, '').length !== 14) {
-            throw new Error('CNPJ deve ter 14 dígitos.');
           }
           if (!clubData.phone.replace(/\D/g, '')) {
             throw new Error('Telefone é obrigatório.');
@@ -287,7 +164,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
         const userData = {
           user_type: userType,
-          email: sanitizedEmail,
+          email: email.toLowerCase(),
           ...(userType === 'club' ? {
             club_name: clubData.clubName.trim(),
             cnpj: clubData.cnpj.replace(/\D/g, ''),
@@ -299,19 +176,19 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           })
         };
 
-        console.log('Attempting signup with email:', sanitizedEmail);
-        const { error } = await signUp(sanitizedEmail, trimmedPassword, userData);
-        if (error) {
-          console.error('Signup error:', error);
-          throw error;
-        }
-
-        alert('Conta criada com sucesso! Verifique seu email para confirmar a conta.');
+        const { user, profile } = await signUp(email, password, userData);
+        refreshProfile();
         onClose();
+        
+        // Navegar para o dashboard apropriado
+        if (profile.user_type === 'club') {
+          navigate('/club-dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       }
     } catch (error: any) {
-      console.error('Authentication error:', error);
-      setError(getErrorMessage(error));
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -376,6 +253,16 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         <h2 className="text-2xl font-bold text-dark-800 mb-6 text-center">
           {isLogin ? 'Entrar na plataforma' : 'Criar sua conta'}
         </h2>
+
+        {/* Dica para testes */}
+        {isLogin && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-sm">
+            <strong>Para testes:</strong><br />
+            Atleta: atleta@teste.com<br />
+            Clube: clube@teste.com<br />
+            Senha: qualquer uma
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
@@ -565,9 +452,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                     spellCheck="false"
                   />
                 </div>
-                <div className="mt-1 text-xs text-gray-500">
-                  Use um email válido como: usuario@exemplo.com
-                </div>
               </div>
 
               <div>
@@ -585,8 +469,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                     className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
                     placeholder="••••••••"
                     required
-                    minLength={6}
-                    maxLength={72}
                     autoComplete={isLogin ? "current-password" : "new-password"}
                   />
                   <button
@@ -596,9 +478,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
-                </div>
-                <div className="mt-1 text-xs text-gray-500">
-                  Mínimo de 6 caracteres
                 </div>
               </div>
 
@@ -618,8 +497,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                       className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
                       placeholder="••••••••"
                       required
-                      minLength={6}
-                      maxLength={72}
                       autoComplete="new-password"
                     />
                     <button
@@ -656,17 +533,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                 ? 'Não tem uma conta? Cadastre-se'
                 : 'Já tem uma conta? Entre'}
             </button>
-            
-            {isLogin && (
-              <div>
-                <a 
-                  href="#" 
-                  className="text-primary-600 hover:text-primary-700 text-sm font-semibold block transition-colors"
-                >
-                  Esqueceu sua senha?
-                </a>
-              </div>
-            )}
           </div>
         )}
       </div>

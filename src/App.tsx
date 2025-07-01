@@ -25,7 +25,6 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; requireAuth?: boolea
 }) => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     if (!loading) {
