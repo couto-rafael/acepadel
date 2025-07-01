@@ -8,7 +8,6 @@ import {
   Users,
   Settings,
   LogOut,
-  MessageSquare,
   Zap
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -20,7 +19,6 @@ const DashboardHeader: React.FC = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(3);
-  const [unreadMessages, setUnreadMessages] = useState(2);
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
 
@@ -236,19 +234,6 @@ const DashboardHeader: React.FC = () => {
                 />
               )}
             </div>
-
-            <button className="text-dark-700 hover:text-primary-900 px-4 py-2 rounded-lg border border-gray-300 hover:border-primary-300 transition-all font-medium">
-              {isClub ? 'Convidar Atletas' : 'Convide Amigo'}
-            </button>
-
-            <Link to="/messages" className="text-dark-600 hover:text-primary-900 relative transition-colors">
-              <MessageSquare size={20} />
-              {unreadMessages > 0 && (
-                <span className="absolute -top-1 -right-1 bg-accent-500 text-dark-900 text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
-                  {unreadMessages}
-                </span>
-              )}
-            </Link>
 
             <div className="relative flex items-center" ref={notificationsRef}>
               <button 

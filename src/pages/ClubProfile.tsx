@@ -98,14 +98,14 @@ const ClubProfile: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-light">
       <DashboardHeader />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column - Club Info */}
           <div className="lg:col-span-4">
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
               <div className="flex flex-col items-center">
                 <div 
                   className="relative w-32 h-32 bg-gray-200 rounded-full overflow-hidden cursor-pointer group"
@@ -137,7 +137,7 @@ const ClubProfile: React.FC = () => {
                 <div className="text-center mt-4">
                   <div className="flex items-center justify-center">
                     <h2 className="text-2xl font-bold">{clubData.fantasyName}</h2>
-                    <BadgeCheck size={24} className="text-blue-500 ml-2" />
+                    <BadgeCheck size={24} className="text-primary-500 ml-2" />
                   </div>
                   <div className="flex items-center justify-center mt-2">
                     <MapPin size={16} className="text-gray-500 mr-1" />
@@ -159,15 +159,15 @@ const ClubProfile: React.FC = () => {
                 
                 <div className="flex justify-between w-full mt-6">
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600">{stats.tournaments}</p>
+                    <p className="text-2xl font-bold text-accent-600">{stats.tournaments}</p>
                     <p className="text-sm text-gray-600">Torneios</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600">{stats.participants}</p>
+                    <p className="text-2xl font-bold text-accent-600">{stats.participants}</p>
                     <p className="text-sm text-gray-600">Participantes</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600">{stats.activeMembers}</p>
+                    <p className="text-2xl font-bold text-accent-600">{stats.activeMembers}</p>
                     <p className="text-sm text-gray-600">Membros</p>
                   </div>
                 </div>
@@ -184,7 +184,7 @@ const ClubProfile: React.FC = () => {
                   <a href="#" className="text-gray-600 hover:text-black">
                     <Globe size={24} />
                   </a>
-                  <button className="text-gray-600 hover:text-green-600">
+                  <button className="text-gray-600 hover:text-accent-600">
                     <Share2 size={24} />
                   </button>
                 </div>
@@ -196,11 +196,11 @@ const ClubProfile: React.FC = () => {
                       <div key={index} className="flex items-center justify-between">
                         <span className="text-sm text-gray-700">{facility.name}</span>
                         {facility.count ? (
-                          <span className="text-sm font-medium text-green-600">{facility.count}</span>
+                          <span className="text-sm font-medium text-accent-600">{facility.count}</span>
                         ) : (
                           <CheckCircle 
                             size={16} 
-                            className={facility.available ? 'text-green-600' : 'text-gray-300'} 
+                            className={facility.available ? 'text-accent-600' : 'text-gray-300'} 
                           />
                         )}
                       </div>
@@ -226,7 +226,7 @@ const ClubProfile: React.FC = () => {
                   </p>
                 </div>
 
-                <button className="w-full mt-6 bg-green-600 text-white py-2 rounded-md hover:bg-green-700 flex items-center justify-center">
+                <button className="w-full mt-6 bg-gradient-to-r from-primary-900 to-primary-700 text-white py-2 rounded-md hover:from-primary-800 hover:to-primary-600 transition-all duration-300 flex items-center justify-center">
                   <Edit2 size={20} className="mr-2" />
                   Editar Perfil
                 </button>
@@ -238,13 +238,13 @@ const ClubProfile: React.FC = () => {
           <div className="lg:col-span-5">
             <div className="space-y-6">
               {/* Recent Tournaments */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
                 <h2 className="text-xl font-bold mb-4">Torneios Recentes</h2>
                 <div className="space-y-4">
                   {recentTournaments.map(tournament => (
                     <div
                       key={tournament.id}
-                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-accent-50 transition-colors"
                     >
                       <div>
                         <h3 className="font-medium text-gray-900">{tournament.name}</h3>
@@ -260,8 +260,8 @@ const ClubProfile: React.FC = () => {
                           tournament.status === 'completed' 
                             ? 'bg-gray-100 text-gray-800' 
                             : tournament.status === 'in-progress'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-green-100 text-green-800'
+                            ? 'bg-primary-100 text-primary-800'
+                            : 'bg-accent-100 text-accent-800'
                         }`}>
                           {tournament.status === 'completed' ? 'Concluído' : 
                            tournament.status === 'in-progress' ? 'Em Andamento' : 'Inscrições Abertas'}
@@ -273,23 +273,23 @@ const ClubProfile: React.FC = () => {
               </div>
 
               {/* Club Statistics */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
                 <h2 className="text-xl font-bold mb-4">Estatísticas do Clube</h2>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600">95%</p>
+                  <div className="text-center p-4 bg-accent-50 rounded-lg">
+                    <p className="text-2xl font-bold text-accent-600">95%</p>
                     <p className="text-sm text-gray-600">Taxa de Ocupação</p>
                   </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600">4.8</p>
+                  <div className="text-center p-4 bg-accent-50 rounded-lg">
+                    <p className="text-2xl font-bold text-accent-600">4.8</p>
                     <p className="text-sm text-gray-600">Avaliação Média</p>
                   </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600">85%</p>
+                  <div className="text-center p-4 bg-accent-50 rounded-lg">
+                    <p className="text-2xl font-bold text-accent-600">85%</p>
                     <p className="text-sm text-gray-600">Membros Ativos</p>
                   </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600">12</p>
+                  <div className="text-center p-4 bg-accent-50 rounded-lg">
+                    <p className="text-2xl font-bold text-accent-600">12</p>
                     <p className="text-sm text-gray-600">Anos de Experiência</p>
                   </div>
                 </div>
@@ -301,7 +301,7 @@ const ClubProfile: React.FC = () => {
           <div className="lg:col-span-3">
             <div className="space-y-6">
               {/* Recent Reviews */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
                 <h2 className="text-xl font-bold mb-4">Avaliações Recentes</h2>
                 <div className="space-y-4">
                   {reviews.map(review => (
@@ -328,7 +328,7 @@ const ClubProfile: React.FC = () => {
               </div>
 
               {/* Contact Info */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
                 <h2 className="text-xl font-bold mb-4">Informações de Contato</h2>
                 <div className="space-y-3">
                   <div className="flex items-center">
@@ -351,18 +351,18 @@ const ClubProfile: React.FC = () => {
               </div>
 
               {/* Quick Actions */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
                 <h2 className="text-xl font-bold mb-4">Ações Rápidas</h2>
                 <div className="space-y-3">
-                  <button className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 flex items-center justify-center">
+                  <button className="w-full bg-gradient-to-r from-primary-900 to-primary-700 text-white py-2 rounded-md hover:from-primary-800 hover:to-primary-600 transition-all duration-300 flex items-center justify-center">
                     <Trophy size={20} className="mr-2" />
                     Criar Torneio
                   </button>
-                  <button className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 flex items-center justify-center">
+                  <button className="w-full bg-gradient-to-r from-accent-500 to-accent-400 text-dark-900 py-2 rounded-md hover:from-accent-400 hover:to-accent-300 transition-all duration-300 flex items-center justify-center">
                     <Users size={20} className="mr-2" />
                     Gerenciar Membros
                   </button>
-                  <button className="w-full bg-gray-600 text-white py-2 rounded-md hover:bg-gray-700 flex items-center justify-center">
+                  <button className="w-full bg-dark-600 text-white py-2 rounded-md hover:bg-dark-700 transition-all duration-300 flex items-center justify-center">
                     <Settings size={20} className="mr-2" />
                     Configurações
                   </button>

@@ -776,6 +776,12 @@ const CreateTournament: React.FC = () => {
       <DashboardHeader />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
+        {/* Page Title */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-dark-900">Criar Torneio</h1>
+          <p className="text-dark-600 mt-2">Configure todos os detalhes do seu novo torneio</p>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column - Tabs */}
           <div className="lg:col-span-3">
