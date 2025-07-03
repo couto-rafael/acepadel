@@ -160,6 +160,30 @@ const CreateTournament: React.FC = () => {
     }));
   };
 
+  const selectAllCategories = () => {
+    setTournamentData(prev => ({
+      ...prev,
+      categories: predefinedCategories
+    }));
+  };
+
+  const deselectAllCategories = () => {
+    setTournamentData(prev => ({
+      ...prev,
+      categories: []
+    }));
+  };
+
+  const addCustomCategory = () => {
+    const categoryName = prompt('Nome da categoria:');
+    if (categoryName && categoryName.trim()) {
+      setTournamentData(prev => ({
+        ...prev,
+        categories: [...prev.categories, categoryName.trim()]
+      }));
+    }
+  };
+
   const handleImageUpload = (field: 'profileImage' | 'bannerImage', file: File) => {
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -327,7 +351,7 @@ const CreateTournament: React.FC = () => {
                 Valor Inscrição *
               </label>
               <div className="relative">
-                <DollarSign size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400" />
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400 font-medium">R$</span>
                 <input
                   type="text"
                   value={tournamentData.registrationFee}
@@ -480,9 +504,33 @@ const CreateTournament: React.FC = () => {
             <h2 className="text-2xl font-bold text-dark-800">Categorias</h2>
             
             <div>
-              <p className="text-sm text-dark-600 mb-4">
-                Selecione as categorias que estarão disponíveis no torneio:
-              </p>
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-sm text-dark-600">
+                  Selecione as categorias que estarão disponíveis no torneio:
+                </p>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={selectAllCategories}
+                    className="text-sm bg-primary-100 text-primary-700 px-3 py-1 rounded-lg hover:bg-primary-200 transition-colors"
+                  >
+                    Selecionar Todas
+                  </button>
+                  <button
+                    onClick={deselectAllCategories}
+                    className="text-sm bg-gray-100 text-gray-700 px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    Desmarcar Todas
+                  </button>
+                  <button
+                    onClick={addCustomCategory}
+                    className="text-sm bg-accent-100 text-accent-700 px-3 py-1 rounded-lg hover:bg-accent-200 transition-colors flex items-center"
+                  >
+                    <Plus size={16} className="mr-1" />
+                    Adicionar
+                  </button>
+                </div>
+              </div>
+              
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {predefinedCategories.map((category) => (
                   <label
@@ -502,7 +550,26 @@ const CreateTournament: React.FC = () => {
                     <span className="text-sm font-semibold">{category}</span>
                   </label>
                 ))}
+                
+                {/* Custom categories */}
+                {tournamentData.categories
+                  .filter(cat => !predefinedCategories.includes(cat))
+                  .map((category) => (
+                    <label
+                      key={category}
+                      className="flex items-center p-4 border-2 border-accent-500 bg-accent-50 text-accent-700 rounded-lg cursor-pointer transition-all"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={true}
+                        onChange={() => toggleCategory(category)}
+                        className="form-checkbox h-4 w-4 text-accent-600 mr-3 rounded focus:ring-accent-500"
+                      />
+                      <span className="text-sm font-semibold">{category}</span>
+                    </label>
+                  ))}
               </div>
+              
               {tournamentData.categories.length > 0 && (
                 <div className="mt-4 p-4 bg-accent-50 rounded-lg border border-accent-200">
                   <p className="text-sm text-accent-700 font-semibold">

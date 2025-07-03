@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Mail, Lock, Eye, EyeOff, User, Building2, Zap } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { signIn, signUp } from '../lib/auth';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -36,7 +35,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   });
 
   const modalRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
   const { refreshProfile } = useAuth();
 
   useEffect(() => {
@@ -120,14 +118,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       if (isLogin) {
         // Login
         const { user, profile } = await signIn(email, password);
-        refreshProfile();
+        await refreshProfile();
         onClose();
         
-        // Navegar para o dashboard apropriado
+        // Navegar para o dashboard apropriado usando window.location
         if (profile.user_type === 'club') {
-          navigate('/club-dashboard');
+          window.location.href = '/club-dashboard';
         } else {
-          navigate('/dashboard');
+          window.location.href = '/dashboard';
         }
       } else {
         // Registration
@@ -177,14 +175,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         };
 
         const { user, profile } = await signUp(email, password, userData);
-        refreshProfile();
+        await refreshProfile();
         onClose();
         
-        // Navegar para o dashboard apropriado
+        // Navegar para o dashboard apropriado usando window.location
         if (profile.user_type === 'club') {
-          navigate('/club-dashboard');
+          window.location.href = '/club-dashboard';
         } else {
-          navigate('/dashboard');
+          window.location.href = '/dashboard';
         }
       }
     } catch (error: any) {

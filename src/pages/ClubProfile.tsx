@@ -4,16 +4,12 @@ import {
   Camera, 
   Edit2, 
   MapPin, 
-  Calendar, 
   Trophy, 
   Users, 
-  Star,
   Instagram,
   Share2,
   BadgeCheck,
   Settings,
-  Medal,
-  Award,
   Building2,
   Phone,
   Mail,
@@ -72,8 +68,7 @@ const ClubProfile: React.FC = () => {
   const stats = {
     tournaments: 15,
     participants: 450,
-    activeMembers: 120,
-    rating: 4.8
+    activeMembers: 120
   };
 
   const recentTournaments = [
@@ -89,12 +84,6 @@ const ClubProfile: React.FC = () => {
     { name: 'Estacionamento', available: true },
     { name: 'Bar/Restaurante', available: true },
     { name: 'Área Kids', available: false }
-  ];
-
-  const reviews = [
-    { id: 1, author: 'João Silva', rating: 5, comment: 'Excelente estrutura e organização!', date: '2024-03-10' },
-    { id: 2, author: 'Maria Santos', rating: 5, comment: 'Melhor clube da região, super recomendo!', date: '2024-03-08' },
-    { id: 3, author: 'Pedro Costa', rating: 4, comment: 'Ótimas quadras e bom atendimento.', date: '2024-03-05' }
   ];
 
   return (
@@ -156,18 +145,23 @@ const ClubProfile: React.FC = () => {
                 <div className="w-full mt-6">
                   <p className="text-gray-700 text-center">{clubData.description}</p>
                 </div>
+
+                <button className="w-full mt-6 bg-gradient-to-r from-primary-900 to-primary-700 text-white py-2 rounded-md hover:from-primary-800 hover:to-primary-600 transition-all duration-300 flex items-center justify-center">
+                  <Edit2 size={20} className="mr-2" />
+                  Editar Perfil
+                </button>
                 
                 <div className="flex justify-between w-full mt-6">
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-accent-600">{stats.tournaments}</p>
+                    <p className="text-2xl font-bold text-primary-600">{stats.tournaments}</p>
                     <p className="text-sm text-gray-600">Torneios</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-accent-600">{stats.participants}</p>
+                    <p className="text-2xl font-bold text-primary-600">{stats.participants}</p>
                     <p className="text-sm text-gray-600">Participantes</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-accent-600">{stats.activeMembers}</p>
+                    <p className="text-2xl font-bold text-primary-600">{stats.activeMembers}</p>
                     <p className="text-sm text-gray-600">Membros</p>
                   </div>
                 </div>
@@ -184,7 +178,7 @@ const ClubProfile: React.FC = () => {
                   <a href="#" className="text-gray-600 hover:text-black">
                     <Globe size={24} />
                   </a>
-                  <button className="text-gray-600 hover:text-accent-600">
+                  <button className="text-gray-600 hover:text-primary-600">
                     <Share2 size={24} />
                   </button>
                 </div>
@@ -196,40 +190,17 @@ const ClubProfile: React.FC = () => {
                       <div key={index} className="flex items-center justify-between">
                         <span className="text-sm text-gray-700">{facility.name}</span>
                         {facility.count ? (
-                          <span className="text-sm font-medium text-accent-600">{facility.count}</span>
+                          <span className="text-sm font-medium text-primary-600">{facility.count}</span>
                         ) : (
                           <CheckCircle 
                             size={16} 
-                            className={facility.available ? 'text-accent-600' : 'text-gray-300'} 
+                            className={facility.available ? 'text-primary-600' : 'text-gray-300'} 
                           />
                         )}
                       </div>
                     ))}
                   </div>
                 </div>
-
-                <div className="w-full mt-6">
-                  <div className="flex items-center justify-center">
-                    <div className="flex items-center">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star
-                          key={star}
-                          size={20}
-                          className={star <= Math.floor(stats.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}
-                        />
-                      ))}
-                      <span className="ml-2 text-lg font-bold text-gray-900">{stats.rating}</span>
-                    </div>
-                  </div>
-                  <p className="text-center text-sm text-gray-600 mt-1">
-                    Baseado em {reviews.length} avaliações
-                  </p>
-                </div>
-
-                <button className="w-full mt-6 bg-gradient-to-r from-primary-900 to-primary-700 text-white py-2 rounded-md hover:from-primary-800 hover:to-primary-600 transition-all duration-300 flex items-center justify-center">
-                  <Edit2 size={20} className="mr-2" />
-                  Editar Perfil
-                </button>
               </div>
             </div>
           </div>
@@ -244,7 +215,7 @@ const ClubProfile: React.FC = () => {
                   {recentTournaments.map(tournament => (
                     <div
                       key={tournament.id}
-                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-accent-50 transition-colors"
+                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-primary-50 transition-colors"
                     >
                       <div>
                         <h3 className="font-medium text-gray-900">{tournament.name}</h3>
@@ -276,54 +247,46 @@ const ClubProfile: React.FC = () => {
               <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
                 <h2 className="text-xl font-bold mb-4">Estatísticas do Clube</h2>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-accent-50 rounded-lg">
-                    <p className="text-2xl font-bold text-accent-600">95%</p>
+                  <div className="text-center p-4 bg-primary-50 rounded-lg">
+                    <p className="text-2xl font-bold text-primary-600">95%</p>
                     <p className="text-sm text-gray-600">Taxa de Ocupação</p>
                   </div>
-                  <div className="text-center p-4 bg-accent-50 rounded-lg">
-                    <p className="text-2xl font-bold text-accent-600">4.8</p>
-                    <p className="text-sm text-gray-600">Avaliação Média</p>
-                  </div>
-                  <div className="text-center p-4 bg-accent-50 rounded-lg">
-                    <p className="text-2xl font-bold text-accent-600">85%</p>
+                  <div className="text-center p-4 bg-primary-50 rounded-lg">
+                    <p className="text-2xl font-bold text-primary-600">85%</p>
                     <p className="text-sm text-gray-600">Membros Ativos</p>
                   </div>
-                  <div className="text-center p-4 bg-accent-50 rounded-lg">
-                    <p className="text-2xl font-bold text-accent-600">12</p>
+                  <div className="text-center p-4 bg-primary-50 rounded-lg">
+                    <p className="text-2xl font-bold text-primary-600">12</p>
                     <p className="text-sm text-gray-600">Anos de Experiência</p>
+                  </div>
+                  <div className="text-center p-4 bg-primary-50 rounded-lg">
+                    <p className="text-2xl font-bold text-primary-600">150+</p>
+                    <p className="text-sm text-gray-600">Torneios Realizados</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right Column - Reviews & Info */}
+          {/* Right Column - Contact & Actions */}
           <div className="lg:col-span-3">
             <div className="space-y-6">
-              {/* Recent Reviews */}
+              {/* Quick Actions */}
               <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                <h2 className="text-xl font-bold mb-4">Avaliações Recentes</h2>
-                <div className="space-y-4">
-                  {reviews.map(review => (
-                    <div key={review.id} className="border-b border-gray-200 pb-4 last:border-b-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-gray-900">{review.author}</span>
-                        <div className="flex items-center">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              size={14}
-                              className={star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-1">{review.comment}</p>
-                      <p className="text-xs text-gray-500">
-                        {new Date(review.date).toLocaleDateString('pt-BR')}
-                      </p>
-                    </div>
-                  ))}
+                <h2 className="text-xl font-bold mb-4">Ações Rápidas</h2>
+                <div className="space-y-3">
+                  <button className="w-full bg-gradient-to-r from-primary-900 to-primary-700 text-white py-2 rounded-md hover:from-primary-800 hover:to-primary-600 transition-all duration-300 flex items-center justify-center">
+                    <Trophy size={20} className="mr-2" />
+                    Criar Torneio
+                  </button>
+                  <button className="w-full bg-gradient-to-r from-accent-500 to-accent-400 text-dark-900 py-2 rounded-md hover:from-accent-400 hover:to-accent-300 transition-all duration-300 flex items-center justify-center">
+                    <Users size={20} className="mr-2" />
+                    Gerenciar Membros
+                  </button>
+                  <button className="w-full bg-dark-600 text-white py-2 rounded-md hover:bg-dark-700 transition-all duration-300 flex items-center justify-center">
+                    <Settings size={20} className="mr-2" />
+                    Configurações
+                  </button>
                 </div>
               </div>
 
@@ -347,25 +310,6 @@ const ClubProfile: React.FC = () => {
                     <Instagram size={16} className="text-gray-500 mr-3" />
                     <span className="text-gray-700">{clubData.instagram}</span>
                   </div>
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                <h2 className="text-xl font-bold mb-4">Ações Rápidas</h2>
-                <div className="space-y-3">
-                  <button className="w-full bg-gradient-to-r from-primary-900 to-primary-700 text-white py-2 rounded-md hover:from-primary-800 hover:to-primary-600 transition-all duration-300 flex items-center justify-center">
-                    <Trophy size={20} className="mr-2" />
-                    Criar Torneio
-                  </button>
-                  <button className="w-full bg-gradient-to-r from-accent-500 to-accent-400 text-dark-900 py-2 rounded-md hover:from-accent-400 hover:to-accent-300 transition-all duration-300 flex items-center justify-center">
-                    <Users size={20} className="mr-2" />
-                    Gerenciar Membros
-                  </button>
-                  <button className="w-full bg-dark-600 text-white py-2 rounded-md hover:bg-dark-700 transition-all duration-300 flex items-center justify-center">
-                    <Settings size={20} className="mr-2" />
-                    Configurações
-                  </button>
                 </div>
               </div>
             </div>

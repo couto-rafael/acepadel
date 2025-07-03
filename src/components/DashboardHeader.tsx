@@ -256,12 +256,6 @@ const DashboardHeader: React.FC = () => {
               )}
             </div>
 
-            {!isClub && (
-              <button className="text-dark-700 hover:text-primary-900 px-4 py-2 rounded-lg border border-gray-300 hover:border-primary-300 transition-all font-medium">
-                Convide Amigo
-              </button>
-            )}
-
             <div className="relative flex items-center" ref={notificationsRef}>
               <button 
                 className="text-dark-600 hover:text-primary-900 relative transition-colors"
@@ -269,7 +263,7 @@ const DashboardHeader: React.FC = () => {
               >
                 <Bell size={20} />
                 {unreadNotifications > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-accent-500 text-dark-900 text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                  <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
                     {unreadNotifications}
                   </span>
                 )}
@@ -309,7 +303,7 @@ const DashboardHeader: React.FC = () => {
                             </p>
                           </div>
                           {notification.unread && (
-                            <span className="w-2 h-2 bg-accent-500 rounded-full"></span>
+                            <span className="w-2 h-2 bg-primary-600 rounded-full"></span>
                           )}
                         </div>
                       </div>

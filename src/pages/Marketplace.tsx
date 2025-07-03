@@ -177,7 +177,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
             >
               Criar Anúncio
             </button>
@@ -237,14 +237,14 @@ const Marketplace: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-light">
       <DashboardHeader />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         <div className="flex flex-col md:flex-row gap-8">
           {/* Left Sidebar - Filters */}
           <div className="w-full md:w-64 flex-shrink-0">
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
               <h2 className="text-lg font-semibold mb-4">Filtros</h2>
               
               <div className="space-y-4">
@@ -259,7 +259,7 @@ const Marketplace: React.FC = () => {
                         onClick={() => setSelectedCategory(category.id)}
                         className={`block w-full text-left px-3 py-2 rounded-md ${
                           selectedCategory === category.id
-                            ? 'bg-green-50 text-green-700'
+                            ? 'bg-primary-50 text-primary-700'
                             : 'text-gray-700 hover:bg-gray-50'
                         }`}
                       >
@@ -320,7 +320,7 @@ const Marketplace: React.FC = () => {
           {/* Main Content */}
           <div className="flex-1">
             {/* Search Bar */}
-            <div className="bg-white rounded-lg shadow p-4 mb-6">
+            <div className="bg-white rounded-xl shadow-lg p-4 mb-6 border border-gray-100">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <input
@@ -328,7 +328,7 @@ const Marketplace: React.FC = () => {
                   placeholder="Buscar produtos..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
             </div>
@@ -336,7 +336,7 @@ const Marketplace: React.FC = () => {
             {/* Products Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {products.map(product => (
-                <div key={product.id} className="bg-white rounded-lg shadow overflow-hidden">
+                <div key={product.id} className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all">
                   <div className="relative">
                     <img
                       src={product.image}
@@ -352,7 +352,7 @@ const Marketplace: React.FC = () => {
                     <h3 className="text-lg font-semibold text-gray-800 mb-2">
                       {product.title}
                     </h3>
-                    <p className="text-2xl font-bold text-gray-900 mb-2">
+                    <p className="text-2xl font-bold text-primary-600 mb-2">
                       R$ {product.price.toFixed(2)}
                     </p>
                     <p className="text-sm text-gray-600 mb-4">
@@ -376,7 +376,7 @@ const Marketplace: React.FC = () => {
                     </div>
 
                     <div className="flex space-x-2">
-                      <button className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center justify-center">
+                      <button className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 flex items-center justify-center">
                         <MessageCircle size={18} className="mr-2" />
                         Mensagem
                       </button>
@@ -392,54 +392,54 @@ const Marketplace: React.FC = () => {
 
           {/* Right Sidebar - User Sales */}
           <div className="w-full md:w-80 flex-shrink-0">
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
               <h2 className="text-lg font-semibold mb-4">Minhas Vendas</h2>
               
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <p className="text-2xl font-bold text-green-600">12</p>
+                <div className="text-center p-4 bg-primary-50 rounded-lg">
+                  <p className="text-2xl font-bold text-primary-600">12</p>
                   <p className="text-sm text-gray-600">Produtos</p>
                 </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <p className="text-2xl font-bold text-green-600">5</p>
+                <div className="text-center p-4 bg-primary-50 rounded-lg">
+                  <p className="text-2xl font-bold text-primary-600">5</p>
                   <p className="text-sm text-gray-600">Vendas</p>
                 </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <p className="text-2xl font-bold text-green-600">8</p>
+                <div className="text-center p-4 bg-primary-50 rounded-lg">
+                  <p className="text-2xl font-bold text-primary-600">8</p>
                   <p className="text-sm text-gray-600">Interessados</p>
                 </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <p className="text-2xl font-bold text-green-600">4.8</p>
+                <div className="text-center p-4 bg-primary-50 rounded-lg">
+                  <p className="text-2xl font-bold text-primary-600">4.8</p>
                   <p className="text-sm text-gray-600">Avaliação</p>
                 </div>
               </div>
 
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center justify-center"
+                className="w-full bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 flex items-center justify-center"
               >
                 <Plus size={20} className="mr-2" />
                 Criar Anúncio
               </button>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
               <h3 className="text-lg font-semibold mb-4">Dicas de Venda</h3>
               <ul className="space-y-3 text-sm text-gray-600">
                 <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-green-600 rounded-full mt-2 mr-2"></span>
+                  <span className="w-1.5 h-1.5 bg-primary-600 rounded-full mt-2 mr-2"></span>
                   Tire fotos com boa iluminação
                 </li>
                 <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-green-600 rounded-full mt-2 mr-2"></span>
+                  <span className="w-1.5 h-1.5 bg-primary-600 rounded-full mt-2 mr-2"></span>
                   Descreva detalhes importantes
                 </li>
                 <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-green-600 rounded-full mt-2 mr-2"></span>
+                  <span className="w-1.5 h-1.5 bg-primary-600 rounded-full mt-2 mr-2"></span>
                   Seja honesto sobre a condição
                 </li>
                 <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-green-600 rounded-full mt-2 mr-2"></span>
+                  <span className="w-1.5 h-1.5 bg-primary-600 rounded-full mt-2 mr-2"></span>
                   Responda rapidamente
                 </li>
               </ul>

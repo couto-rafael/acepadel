@@ -106,7 +106,7 @@ const SponsorModal: React.FC<SponsorModalProps> = ({ isOpen, onClose, onSave }) 
             </button>
             <button
               onClick={() => onSave(sponsorName, selectedImage)}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
             >
               Salvar
             </button>
@@ -282,6 +282,12 @@ const Settings: React.FC = () => {
         { id: "allow_challenges", label: "Permitir desafios", description: "Outros jogadores podem te desafiar para partidas", enabled: true },
         { id: "show_activity", label: "Mostrar atividade", description: "Sua atividade recente é visível para outros jogadores", enabled: false }
       ]
+    },
+    {
+      category: "Conta",
+      settings: [
+        { id: "delete_account", label: "Deletar conta", description: "Remover permanentemente sua conta e todos os dados", enabled: false, isDestructive: true }
+      ]
     }
   ];
 
@@ -455,12 +461,12 @@ const Settings: React.FC = () => {
                   setAthleteData(prev => ({ ...prev, [field]: e.target.value }));
                 }
               }}
-              className="block w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="block w-full px-3 py-2 border border-primary-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               autoFocus
             />
             <button
               onClick={() => handleFieldSave(field, isClub ? clubData[field as keyof typeof clubData] as string : athleteData[field as keyof typeof athleteData] as string)}
-              className="absolute right-3 text-green-600 hover:text-green-700"
+              className="absolute right-3 text-primary-600 hover:text-primary-700"
             >
               <Check size={16} />
             </button>
@@ -594,7 +600,7 @@ const Settings: React.FC = () => {
             ))}
             <button
               onClick={addCourt}
-              className="flex items-center text-green-600 hover:text-green-700"
+              className="flex items-center text-primary-600 hover:text-primary-700"
             >
               <Plus size={20} className="mr-2" />
               Adicionar Quadra
@@ -623,7 +629,7 @@ const Settings: React.FC = () => {
                       [facility.key]: e.target.checked
                     }
                   }))}
-                  className="form-checkbox h-5 w-5 text-green-600"
+                  className="form-checkbox h-5 w-5 text-primary-600"
                 />
                 <span className="ml-2">{facility.label}</span>
               </label>
@@ -663,7 +669,7 @@ const Settings: React.FC = () => {
         <div className="pt-4">
           <button
             onClick={handleSaveProfile}
-            className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700"
+            className="w-full bg-primary-600 text-white py-2 rounded-md hover:bg-primary-700"
           >
             Salvar Perfil do Clube
           </button>
@@ -767,7 +773,7 @@ const Settings: React.FC = () => {
                 <span className="text-gray-700">Instagram</span>
                 <button
                   onClick={() => setShowSocialFields(prev => ({ ...prev, instagram: !prev.instagram }))}
-                  className="ml-2 text-green-600 hover:text-green-700"
+                  className="ml-2 text-primary-600 hover:text-primary-700"
                 >
                   <Plus size={16} />
                 </button>
@@ -779,7 +785,7 @@ const Settings: React.FC = () => {
                 <span className="text-gray-700">X</span>
                 <button
                   onClick={() => setShowSocialFields(prev => ({ ...prev, twitter: !prev.twitter }))}
-                  className="ml-2 text-green-600 hover:text-green-700"
+                  className="ml-2 text-primary-600 hover:text-primary-700"
                 >
                   <Plus size={16} />
                 </button>
@@ -793,7 +799,7 @@ const Settings: React.FC = () => {
                 <span className="text-gray-700">TikTok</span>
                 <button
                   onClick={() => setShowSocialFields(prev => ({ ...prev, threads: !prev.threads }))}
-                  className="ml-2 text-green-600 hover:text-green-700"
+                  className="ml-2 text-primary-600 hover:text-primary-700"
                 >
                   <Plus size={16} />
                 </button>
@@ -816,7 +822,7 @@ const Settings: React.FC = () => {
                         : athleteData.sports.filter(s => s !== sport);
                       setAthleteData(prev => ({ ...prev, sports: newSports }));
                     }}
-                    className="form-checkbox h-5 w-5 text-green-600"
+                    className="form-checkbox h-5 w-5 text-primary-600"
                   />
                   <span className="ml-2">{sport}</span>
                 </label>
@@ -838,7 +844,7 @@ const Settings: React.FC = () => {
                         : athleteData.rackets.filter(r => r !== racket);
                       setAthleteData(prev => ({ ...prev, rackets: newRackets }));
                     }}
-                    className="form-checkbox h-5 w-5 text-green-600"
+                    className="form-checkbox h-5 w-5 text-primary-600"
                   />
                   <span className="ml-2">{racket}</span>
                 </label>
@@ -862,7 +868,7 @@ const Settings: React.FC = () => {
             </div>
             <button
               onClick={() => setShowSponsorModal(true)}
-              className="flex items-center text-green-600 hover:text-green-700"
+              className="flex items-center text-primary-600 hover:text-primary-700"
             >
               <Plus size={20} className="mr-2" />
               Adicionar Patrocinador
@@ -872,7 +878,7 @@ const Settings: React.FC = () => {
           <div className="pt-4">
             <button
               onClick={handleSaveProfile}
-              className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700"
+              className="w-full bg-primary-600 text-white py-2 rounded-md hover:bg-primary-700"
             >
               Salvar
             </button>
@@ -898,17 +904,17 @@ const Settings: React.FC = () => {
                   key={achievement.id}
                   className={`p-4 rounded-lg border ${
                     achievement.earned
-                      ? 'border-green-200 bg-green-50'
+                      ? 'border-primary-200 bg-primary-50'
                       : 'border-gray-200 bg-gray-50'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
                     <div className={`p-2 rounded-full ${
-                      achievement.earned ? 'bg-green-200' : 'bg-gray-200'
+                      achievement.earned ? 'bg-primary-200' : 'bg-gray-200'
                     }`}>
                       <achievement.icon
                         size={24}
-                        className={achievement.earned ? 'text-green-600' : 'text-gray-500'}
+                        className={achievement.earned ? 'text-primary-600' : 'text-gray-500'}
                       />
                     </div>
                     <div>
@@ -941,7 +947,7 @@ const Settings: React.FC = () => {
                             type="checkbox"
                             checked={setting.email}
                             onChange={() => {}}
-                            className="form-checkbox h-5 w-5 text-green-600"
+                            className="form-checkbox h-5 w-5 text-primary-600"
                           />
                           <span className="text-sm text-gray-600">Email</span>
                         </label>
@@ -950,7 +956,7 @@ const Settings: React.FC = () => {
                             type="checkbox"
                             checked={setting.push}
                             onChange={() => {}}
-                            className="form-checkbox h-5 w-5 text-green-600"
+                            className="form-checkbox h-5 w-5 text-primary-600"
                           />
                           <span className="text-sm text-gray-600">Push</span>
                         </label>
@@ -978,15 +984,21 @@ const Settings: React.FC = () => {
                         <p className="text-sm text-gray-600">{setting.description}</p>
                       </div>
                       <div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={setting.enabled}
-                            onChange={() => {}}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-                        </label>
+                        {setting.isDestructive ? (
+                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-md hover:bg-red-50 transition-colors">
+                            Deletar Conta
+                          </button>
+                        ) : (
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={setting.enabled}
+                              onChange={() => {}}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                          </label>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -1018,7 +1030,7 @@ const Settings: React.FC = () => {
                             onChange={() => {}}
                             className="sr-only peer"
                           />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                         </label>
                       </div>
                     </div>
@@ -1076,10 +1088,10 @@ const Settings: React.FC = () => {
                     Partidas: <span className="font-semibold">{performanceStats.overall.matches}</span>
                   </p>
                   <p className="text-sm text-gray-600">
-                    Vitórias: <span className="font-semibold">{performanceStats.overall.wins}</span>
+                    Vitórias: <span className="font-semibold text-primary-600">{performanceStats.overall.wins}</span>
                   </p>
                   <p className="text-sm text-gray-600">
-                    Taxa de vitória: <span className="font-semibold">{performanceStats.overall.winRate}%</span>
+                    Taxa de vitória: <span className="font-semibold text-primary-600">{performanceStats.overall.winRate}%</span>
                   </p>
                 </div>
               </div>
@@ -1093,7 +1105,7 @@ const Settings: React.FC = () => {
                   <p className="text-sm text-gray-600">
                     Vitórias: <span className="font-semibold">{performanceStats.monthly.wins}</span>
                   </p>
-                  <p className="text-sm text-green-600">
+                  <p className="text-sm text-primary-600">
                     Melhoria: <span className="font-semibold">+{performanceStats.monthly.improvement}%</span>
                   </p>
                 </div>
@@ -1102,7 +1114,7 @@ const Settings: React.FC = () => {
               <div className="bg-white p-4 rounded-lg border border-gray-200">
                 <h3 className="font-semibold text-gray-700 mb-2">Média de Pontos</h3>
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-green-600">
+                  <p className="text-3xl font-bold text-primary-600">
                     {performanceStats.overall.averageScore}
                   </p>
                   <p className="text-sm text-gray-600">pontos por jogo</p>
@@ -1123,7 +1135,7 @@ const Settings: React.FC = () => {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
-                        className="bg-green-600 h-2 rounded-full"
+                        className="bg-primary-600 h-2 rounded-full"
                         style={{ width: `${value}%` }}
                       ></div>
                     </div>
@@ -1139,12 +1151,12 @@ const Settings: React.FC = () => {
                   <div
                     key={match.id}
                     className={`flex items-center justify-between p-3 rounded-lg ${
-                      match.result === 'win' ? 'bg-green-50' : 'bg-red-50'
+                      match.result === 'win' ? 'bg-primary-50' : 'bg-red-50'
                     }`}
                   >
                     <div>
                       <span className={`font-medium ${
-                        match.result === 'win' ? 'text-green-600' : 'text-red-600'
+                        match.result === 'win' ? 'text-primary-600' : 'text-red-600'
                       }`}>
                         {match.result === 'win' ? 'Vitória' : 'Derrota'}
                       </span>
@@ -1170,14 +1182,14 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-light">
       <DashboardHeader />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column - Menu */}
           <div className="lg:col-span-3">
-            <div className="bg-white rounded-lg shadow">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-100">
               <nav className="space-y-1">
                 {menuItems.map((item) => {
                   const Icon = item.icon;
@@ -1187,7 +1199,7 @@ const Settings: React.FC = () => {
                       onClick={() => setSelectedSection(item.id)}
                       className={`w-full text-left px-4 py-3 flex items-center space-x-3 ${
                         selectedSection === item.id
-                          ? 'bg-green-50 border-l-4 border-green-600 text-green-700'
+                          ? 'bg-primary-50 border-l-4 border-primary-600 text-primary-700'
                           : 'text-gray-600 hover:bg-gray-50'
                       }`}
                     >
@@ -1202,14 +1214,14 @@ const Settings: React.FC = () => {
 
           {/* Center Column - Content */}
           <div className="lg:col-span-6">
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
               {renderContent()}
             </div>
           </div>
 
           {/* Right Column - Account Info */}
           <div className="lg:col-span-3">
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
               <h2 className="text-xl font-bold text-gray-800 mb-6">Conta</h2>
               
               <div className="space-y-4">
@@ -1218,7 +1230,7 @@ const Settings: React.FC = () => {
                   <p className="text-gray-900">
                     {isClub ? clubData.email || 'contato@clube.com' : 'usuario@email.com'}
                   </p>
-                  <a href="#" className="text-sm text-green-600 hover:text-green-700">
+                  <a href="#" className="text-sm text-primary-600 hover:text-primary-700">
                     Alterar e-mail de acesso
                   </a>
                 </div>
@@ -1235,17 +1247,6 @@ const Settings: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-500">Membro desde</label>
                   <p className="text-gray-900">01 de Janeiro de 2024</p>
-                </div>
-
-                <div className="pt-4 border-t border-gray-200">
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">Deletar conta</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Ao deletar sua conta, todos os seus dados serão permanentemente removidos.
-                    Esta ação não pode ser desfeita.
-                  </p>
-                  <button className="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700">
-                    Deletar Conta
-                  </button>
                 </div>
               </div>
             </div>
