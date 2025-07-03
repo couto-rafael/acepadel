@@ -28,7 +28,7 @@ interface TournamentData {
     startTime: string;
     endTime: string;
   }>;
-  registrationFee: string;
+  registrationFee: number;
   description: string;
   mainClub: string;
   subClub: string;
@@ -50,7 +50,7 @@ const CreateTournament: React.FC = () => {
     startDate: '',
     endDate: '',
     dailySchedules: [],
-    registrationFee: '',
+    registrationFee: 0,
     description: '',
     mainClub: '',
     subClub: '',
@@ -354,11 +354,11 @@ const CreateTournament: React.FC = () => {
                 <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400 font-medium">R$</span>
                 <input
                   type="text"
-                  value={tournamentData.registrationFee}
+                  value={tournamentData.registrationFee.toFixed(2)}
                   onChange={(e) => {
                     const value = e.target.value.replace(/\D/g, '');
-                    const formatted = (parseFloat(value) / 100).toFixed(2);
-                    handleInputChange('registrationFee', formatted);
+                    const numericValue = parseFloat(value) / 100;
+                    handleInputChange('registrationFee', isNaN(numericValue) ? 0 : numericValue);
                   }}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
                   placeholder="0,00"
