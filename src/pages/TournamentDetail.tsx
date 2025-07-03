@@ -68,7 +68,14 @@ const TournamentDetail: React.FC = () => {
     const foundTournament = clubTournaments.find((t: any) => t.id === id);
     
     if (foundTournament) {
-      setTournament(foundTournament);
+      // Ensure registrationFee is a number
+      const processedTournament = {
+        ...foundTournament,
+        registrationFee: parseFloat(foundTournament.registrationFee) || 0,
+        maxParticipants: parseInt(foundTournament.maxParticipants) || 0,
+        participantsCount: parseInt(foundTournament.participantsCount) || 0
+      };
+      setTournament(processedTournament);
     }
     setLoading(false);
   }, [id]);
