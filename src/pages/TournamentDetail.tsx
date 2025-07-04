@@ -21,7 +21,9 @@ import {
   Share2,
   Heart,
   User,
-  Building2
+  Building2,
+  Plus,
+  X
 } from 'lucide-react';
 
 interface TournamentData {
@@ -46,6 +48,96 @@ interface TournamentData {
   dailySchedules: Array<{ date: string; startTime: string; endTime: string }>;
 }
 
+interface Participant {
+  id: string;
+  name: string;
+  partner: string;
+  category: string;
+  avatar: string;
+}
+
+interface AIModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  categories: string[];
+  onConfirm: (quantity: number, category: string) => void;
+}
+
+const AIModal: React.FC<AIModalProps> = ({ isOpen, onClose, categories, onConfirm }) => {
+  const [quantity, setQuantity] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleConfirm = () => {
+    if (selectedCategory) {
+      onConfirm(quantity, selectedCategory);
+      onClose();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-96">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Adicionar Duplas com AI</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <X size={20} />
+          </button>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Quantidade de Duplas
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="20"
+              value={quantity}
+              onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Categoria
+            </label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="">Selecione uma categoria</option>
+              {categories.map((category, index) => (
+                <option key={index} value={category}>{category}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="flex justify-end space-x-2 mt-6">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleConfirm}
+              disabled={!selectedCategory}
+              className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50"
+            >
+              Confirmar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const TournamentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
@@ -53,6 +145,8 @@ const TournamentDetail: React.FC = () => {
   const [activeTab, setActiveTab] = useState('informacoes');
   const [activeInfoTab, setActiveInfoTab] = useState('gerais');
   const [loading, setLoading] = useState(true);
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [participants, setParticipants] = useState<Participant[]>([]);
 
   useEffect(() => {
     // Check if there's a tab parameter in the URL
@@ -77,8 +171,75 @@ const TournamentDetail: React.FC = () => {
       };
       setTournament(processedTournament);
     }
+
+    // Load participants from localStorage
+    const savedParticipants = localStorage.getItem(`tournament_${id}_participants`);
+    if (savedParticipants) {
+      setParticipants(JSON.parse(savedParticipants));
+    }
+
     setLoading(false);
   }, [id]);
+
+  const generateRandomNames = () => {
+    const firstNames = [
+      'João', 'Maria', 'Pedro', 'Ana', 'Carlos', 'Julia', 'Rafael', 'Camila',
+      'Lucas', 'Fernanda', 'Bruno', 'Beatriz', 'Diego', 'Larissa', 'Thiago', 'Mariana',
+      'Gabriel', 'Isabela', 'Felipe', 'Carolina', 'Rodrigo', 'Natália', 'André', 'Patrícia'
+    ];
+    
+    const lastNames = [
+      'Silva', 'Santos', 'Costa', 'Lima', 'Rocha', 'Dias', 'Alves', 'Souza',
+      'Oliveira', 'Pereira', 'Ferreira', 'Barbosa', 'Ribeiro', 'Martins', 'Carvalho', 'Gomes'
+    ];
+
+    const avatars = [
+      'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg',
+      'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg',
+      'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg',
+      'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg',
+      'https://images.pexels.com/photos/1212984/pexels-photo-1212984.jpeg',
+      'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg',
+      'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg',
+      'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg'
+    ];
+
+    const getRandomName = () => {
+      const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+      const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+      return `${firstName} ${lastName}`;
+    };
+
+    const getRandomAvatar = () => {
+      return avatars[Math.floor(Math.random() * avatars.length)];
+    };
+
+    return { getRandomName, getRandomAvatar };
+  };
+
+  const handleAIConfirm = (quantity: number, category: string) => {
+    const { getRandomName, getRandomAvatar } = generateRandomNames();
+    const newParticipants: Participant[] = [];
+
+    for (let i = 0; i < quantity; i++) {
+      const player1 = getRandomName();
+      const player2 = getRandomName();
+      
+      newParticipants.push({
+        id: `ai_${Date.now()}_${i}`,
+        name: player1,
+        partner: player2,
+        category: category,
+        avatar: getRandomAvatar()
+      });
+    }
+
+    const updatedParticipants = [...participants, ...newParticipants];
+    setParticipants(updatedParticipants);
+    
+    // Save to localStorage
+    localStorage.setItem(`tournament_${id}_participants`, JSON.stringify(updatedParticipants));
+  };
 
   const mainTabs = [
     { id: 'informacoes', label: 'Informações', icon: FileText },
@@ -95,13 +256,6 @@ const TournamentDetail: React.FC = () => {
     { id: 'localizacao', label: 'Localização' },
     { id: 'regras', label: 'Regras' },
     { id: 'faq', label: 'FAQ' }
-  ];
-
-  const mockParticipants = [
-    { id: 1, name: 'João Silva', partner: 'Maria Santos', category: 'Open Masculina', avatar: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg' },
-    { id: 2, name: 'Pedro Costa', partner: 'Ana Lima', category: 'Open Masculina', avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg' },
-    { id: 3, name: 'Carlos Rocha', partner: 'Julia Dias', category: 'Mista A', avatar: 'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg' },
-    { id: 4, name: 'Rafael Alves', partner: 'Camila Souza', category: 'Mista A', avatar: 'https://images.pexels.com/photos/1212984/pexels-photo-1212984.jpeg' }
   ];
 
   const mockMatches = [
@@ -375,29 +529,64 @@ const TournamentDetail: React.FC = () => {
         );
 
       case 'inscritos':
+        const participantsByCategory = participants.reduce((acc, participant) => {
+          if (!acc[participant.category]) {
+            acc[participant.category] = [];
+          }
+          acc[participant.category].push(participant);
+          return acc;
+        }, {} as Record<string, Participant[]>);
+
         return (
           <div className="bg-white rounded-xl shadow-lg border border-gray-100">
             <div className="p-6 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-dark-800">Participantes Inscritos</h3>
-              <p className="text-dark-600">{mockParticipants.length} duplas inscritas</p>
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-bold text-dark-800">Participantes Inscritos</h3>
+                  <p className="text-dark-600">{participants.length} duplas inscritas</p>
+                </div>
+                <button
+                  onClick={() => setShowAIModal(true)}
+                  className="bg-gradient-to-r from-accent-500 to-accent-400 text-dark-900 px-4 py-2 rounded-lg hover:from-accent-400 hover:to-accent-300 transition-all duration-300 flex items-center font-semibold"
+                >
+                  <Plus size={16} className="mr-2" />
+                  Dupla c/ AI
+                </button>
+              </div>
             </div>
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {mockParticipants.map(participant => (
-                  <div key={participant.id} className="flex items-center p-4 bg-gray-50 rounded-lg">
-                    <img
-                      src={participant.avatar}
-                      alt={participant.name}
-                      className="w-12 h-12 rounded-full object-cover mr-4"
-                    />
-                    <div>
-                      <h4 className="font-semibold text-dark-800">{participant.name}</h4>
-                      <p className="text-sm text-dark-600">Parceiro: {participant.partner}</p>
-                      <p className="text-sm text-primary-600">{participant.category}</p>
+              {Object.keys(participantsByCategory).length === 0 ? (
+                <div className="text-center py-12">
+                  <Users size={64} className="text-gray-300 mx-auto mb-4" />
+                  <p className="text-dark-500">Nenhuma dupla inscrita ainda</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {Object.entries(participantsByCategory).map(([category, categoryParticipants]) => (
+                    <div key={category}>
+                      <h4 className="text-lg font-semibold text-dark-800 mb-3 flex items-center">
+                        <Trophy size={18} className="mr-2 text-primary-600" />
+                        {category} ({categoryParticipants.length} duplas)
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {categoryParticipants.map(participant => (
+                          <div key={participant.id} className="flex items-center p-4 bg-gray-50 rounded-lg">
+                            <img
+                              src={participant.avatar}
+                              alt={participant.name}
+                              className="w-12 h-12 rounded-full object-cover mr-4"
+                            />
+                            <div>
+                              <h5 className="font-semibold text-dark-800">{participant.name}</h5>
+                              <p className="text-sm text-dark-600">Parceiro: {participant.partner}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         );
@@ -600,6 +789,13 @@ const TournamentDetail: React.FC = () => {
           {renderTabContent()}
         </div>
       </div>
+
+      <AIModal
+        isOpen={showAIModal}
+        onClose={() => setShowAIModal(false)}
+        categories={tournament?.categories || []}
+        onConfirm={handleAIConfirm}
+      />
     </div>
   );
 };

@@ -24,8 +24,13 @@ import {
   Phone,
   Mail,
   FileText,
-  Globe
+  Globe,
+  CreditCard,
+  DollarSign,
+  Eye,
+  EyeOff
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface SponsorModalProps {
   isOpen: boolean;
@@ -124,16 +129,13 @@ const Settings: React.FC = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [sponsors, setSponsors] = useState<Array<{ name: string; image: string }>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [showSocialFields, setShowSocialFields] = useState({
-    instagram: false,
-    twitter: false,
-    threads: false
-  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { profile } = useAuth();
 
   // Check user type
-  const userType = localStorage.getItem('userType') || 'athlete';
-  const isClub = userType === 'club';
-  const isNewClub = localStorage.getItem('isNewClub') === 'true';
+  const isClub = profile?.user_type === 'club';
   
   // Different form data based on user type
   const [athleteData, setAthleteData] = useState({
@@ -153,45 +155,39 @@ const Settings: React.FC = () => {
 
   const [clubData, setClubData] = useState({
     clubName: '',
-    fantasyName: '',
-    email: '',
     cnpj: '',
+    email: '',
     phone: '',
-    city: '',
-    state: '',
-    fullAddress: '',
+    slogan: '',
     description: '',
     courts: [] as Array<{ id: string; name: string }>,
-    facilities: {
+    extras: {
       parking: false,
-      lockers: false,
       bar: false,
       restaurant: false,
-      kidsArea: false
+      lockers: false,
+      partyHall: false,
+      barbecue: false
     },
-    instagram: '',
-    twitter: '',
-    threads: ''
+    address: {
+      cep: '',
+      street: '',
+      number: '',
+      neighborhood: '',
+      city: '',
+      state: ''
+    },
+    pixKeys: [] as Array<{ id: string; type: string; key: string; order: number }>,
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
 
-  // Load initial club data if it exists
-  useEffect(() => {
-    if (isClub) {
-      const savedClubData = localStorage.getItem('clubData');
-      if (savedClubData) {
-        const parsedData = JSON.parse(savedClubData);
-        setClubData(prev => ({ ...prev, ...parsedData }));
-      }
-      
-      // Clear the new club flag after first load
-      if (isNewClub) {
-        localStorage.removeItem('isNewClub');
-      }
-    }
-  }, [isClub, isNewClub]);
-
   const menuItems = isClub ? [
-    { id: 'profile', label: 'Perfil do Clube', icon: Building2 },
+    { id: 'profile', label: 'Perfil', icon: Building2 },
+    { id: 'structure', label: 'Estrutura', icon: MapPin },
+    { id: 'financial', label: 'Financeiro', icon: CreditCard },
+    { id: 'account', label: 'Conta', icon: UserCheck },
     { id: 'notifications', label: 'Notificações', icon: BellIcon },
     { id: 'privacy', label: 'Privacidade', icon: Lock },
     { id: 'permissions', label: 'Permissões', icon: Shield }
@@ -430,13 +426,74 @@ const Settings: React.FC = () => {
     }));
   };
 
+  const addPixKey = () => {
+    const newPixKey = {
+      id: Date.now().toString(),
+      type: 'email',
+      key: '',
+      order: clubData.pixKeys.length + 1
+    };
+    setClubData(prev => ({
+      ...prev,
+      pixKeys: [...prev.pixKeys, newPixKey]
+    }));
+  };
+
+  const removePixKey = (keyId: string) => {
+    setClubData(prev => ({
+      ...prev,
+      pixKeys: prev.pixKeys.filter(key => key.id !== keyId)
+    }));
+  };
+
+  const updatePixKey = (keyId: string, field: string, value: string) => {
+    setClubData(prev => ({
+      ...prev,
+      pixKeys: prev.pixKeys.map(key => 
+        key.id === keyId ? { ...key, [field]: value } : key
+      )
+    }));
+  };
+
+  const formatCNPJ = (value: string) => {
+    return value
+      .replace(/\D/g, '')
+      .replace(/(\d{2})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1/$2')
+      .replace(/(\d{4})(\d)/, '$1-$2')
+      .slice(0, 18);
+  };
+
+  const formatPhone = (value: string) => {
+    return value
+      .replace(/\D/g, '')
+      .replace(/(\d{2})(\d)/, '($1) $2')
+      .replace(/(\d)(\d{4})/, '$1 $2')
+      .replace(/(\d{4})(\d)/, '$1-$2')
+      .slice(0, 17);
+  };
+
+  const formatCEP = (value: string) => {
+    return value
+      .replace(/\D/g, '')
+      .replace(/(\d{5})(\d)/, '$1-$2')
+      .slice(0, 9);
+  };
+
   useEffect(() => {
     const savedImage = localStorage.getItem('profileImage');
     if (savedImage) {
       setProfileImage(savedImage);
     }
 
-    if (!isClub) {
+    if (isClub) {
+      const savedClubData = localStorage.getItem('clubData');
+      if (savedClubData) {
+        const parsedData = JSON.parse(savedClubData);
+        setClubData(prev => ({ ...prev, ...parsedData }));
+      }
+    } else {
       const savedUserData = localStorage.getItem('userData');
       if (savedUserData) {
         setAthleteData(JSON.parse(savedUserData));
@@ -498,7 +555,7 @@ const Settings: React.FC = () => {
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Foto de Perfil
+            Logo do Clube
           </label>
           <div className="relative w-32 h-32">
             <div 
@@ -530,55 +587,87 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Nome Fantasia</label>
-            {renderEditableField('fantasyName', clubData.fantasyName)}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-            {renderEditableField('email', clubData.email, 'email')}
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Nome do Clube</label>
+          <input
+            type="text"
+            value={clubData.clubName}
+            onChange={(e) => setClubData(prev => ({ ...prev, clubName: e.target.value }))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">CNPJ</label>
-            {renderEditableField('cnpj', clubData.cnpj)}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Contato</label>
-            {renderEditableField('phone', clubData.phone, 'tel')}
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">CNPJ</label>
+          <input
+            type="text"
+            value={clubData.cnpj}
+            onChange={(e) => setClubData(prev => ({ ...prev, cnpj: formatCNPJ(e.target.value) }))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            placeholder="00.000.000/0000-00"
+          />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Cidade</label>
-            {renderEditableField('city', clubData.city)}
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+          <input
+            type="email"
+            value={clubData.email}
+            onChange={(e) => setClubData(prev => ({ ...prev, email: e.target.value }))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
-            {renderEditableField('state', clubData.state)}
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Contato</label>
+          <input
+            type="text"
+            value={clubData.phone}
+            onChange={(e) => setClubData(prev => ({ ...prev, phone: formatPhone(e.target.value) }))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            placeholder="(00) 0 0000-0000"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Slogan</label>
+          <input
+            type="text"
+            value={clubData.slogan}
+            onChange={(e) => setClubData(prev => ({ ...prev, slogan: e.target.value }))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            placeholder="Slogan do seu clube"
+          />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Descrição do Clube</label>
-          <div className="group relative">
-            <textarea
-              value={clubData.description}
-              onChange={(e) => setClubData(prev => ({ ...prev, description: e.target.value }))}
-              rows={4}
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md resize-none"
-              placeholder="Descreva seu clube, instalações, diferenciais..."
-            />
-          </div>
+          <textarea
+            value={clubData.description}
+            onChange={(e) => setClubData(prev => ({ ...prev, description: e.target.value }))}
+            rows={4}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md resize-none"
+            placeholder="Descreva seu clube, instalações, diferenciais..."
+          />
         </div>
 
+        <div className="pt-4">
+          <button
+            onClick={handleSaveProfile}
+            className="w-full bg-primary-600 text-white py-2 rounded-md hover:bg-primary-700"
+          >
+            Salvar Perfil
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderStructure = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-gray-800">Estrutura</h2>
+      
+      <div className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Quadras</label>
           <div className="space-y-2">
@@ -609,60 +698,125 @@ const Settings: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Estrutura</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Extras</label>
           <div className="grid grid-cols-2 gap-4">
             {[
               { key: 'parking', label: 'Estacionamento' },
-              { key: 'lockers', label: 'Vestiários' },
               { key: 'bar', label: 'Bar' },
               { key: 'restaurant', label: 'Restaurante' },
-              { key: 'kidsArea', label: 'Área Kids' }
-            ].map((facility) => (
-              <label key={facility.key} className="flex items-center">
+              { key: 'lockers', label: 'Vestiários' },
+              { key: 'partyHall', label: 'Salão de Festas' },
+              { key: 'barbecue', label: 'Churrasqueira' }
+            ].map((extra) => (
+              <label key={extra.key} className="flex items-center">
                 <input
                   type="checkbox"
-                  checked={clubData.facilities[facility.key as keyof typeof clubData.facilities]}
+                  checked={clubData.extras[extra.key as keyof typeof clubData.extras]}
                   onChange={(e) => setClubData(prev => ({
                     ...prev,
-                    facilities: {
-                      ...prev.facilities,
-                      [facility.key]: e.target.checked
+                    extras: {
+                      ...prev.extras,
+                      [extra.key]: e.target.checked
                     }
                   }))}
                   className="form-checkbox h-5 w-5 text-primary-600"
                 />
-                <span className="ml-2">{facility.label}</span>
+                <span className="ml-2">{extra.label}</span>
               </label>
             ))}
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Redes Sociais</label>
-          <div className="space-y-3">
-            <div className="flex items-center">
-              <Instagram size={20} className="text-gray-500 mr-3" />
-              <span className="text-gray-700 w-20">Instagram</span>
-              <div className="flex-1">
-                {renderEditableField('instagram', clubData.instagram)}
-              </div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Endereço Completo</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">CEP</label>
+              <input
+                type="text"
+                value={clubData.address.cep}
+                onChange={(e) => setClubData(prev => ({
+                  ...prev,
+                  address: { ...prev.address, cep: formatCEP(e.target.value) }
+                }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                placeholder="00000-000"
+              />
             </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Rua</label>
+              <input
+                type="text"
+                value={clubData.address.street}
+                onChange={(e) => setClubData(prev => ({
+                  ...prev,
+                  address: { ...prev.address, street: e.target.value }
+                }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Número</label>
+              <input
+                type="text"
+                value={clubData.address.number}
+                onChange={(e) => setClubData(prev => ({
+                  ...prev,
+                  address: { ...prev.address, number: e.target.value }
+                }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Bairro</label>
+              <input
+                type="text"
+                value={clubData.address.neighborhood}
+                onChange={(e) => setClubData(prev => ({
+                  ...prev,
+                  address: { ...prev.address, neighborhood: e.target.value }
+                }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Cidade</label>
+              <input
+                type="text"
+                value={clubData.address.city}
+                onChange={(e) => setClubData(prev => ({
+                  ...prev,
+                  address: { ...prev.address, city: e.target.value }
+                }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Estado</label>
+              <input
+                type="text"
+                value={clubData.address.state}
+                onChange={(e) => setClubData(prev => ({
+                  ...prev,
+                  address: { ...prev.address, state: e.target.value }
+                }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+          </div>
+        </div>
 
-            <div className="flex items-center">
-              <Twitter size={20} className="text-gray-500 mr-3" />
-              <span className="text-gray-700 w-20">Twitter/X</span>
-              <div className="flex-1">
-                {renderEditableField('twitter', clubData.twitter)}
-              </div>
-            </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Maps</label>
+          <div className="bg-gray-100 h-32 rounded-lg flex items-center justify-center">
+            <p className="text-gray-500">Google Maps será implementado aqui</p>
+          </div>
+        </div>
 
-            <div className="flex items-center">
-              <Globe size={20} className="text-gray-500 mr-3" />
-              <span className="text-gray-700 w-20">Threads</span>
-              <div className="flex-1">
-                {renderEditableField('threads', clubData.threads)}
-              </div>
-            </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Fotos</label>
+          <div className="bg-gray-100 h-32 rounded-lg flex items-center justify-center">
+            <p className="text-gray-500">Upload de fotos será implementado aqui</p>
           </div>
         </div>
 
@@ -671,8 +825,159 @@ const Settings: React.FC = () => {
             onClick={handleSaveProfile}
             className="w-full bg-primary-600 text-white py-2 rounded-md hover:bg-primary-700"
           >
-            Salvar Perfil do Clube
+            Salvar Estrutura
           </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderFinancial = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-gray-800">Financeiro</h2>
+      
+      <div className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Chaves PIX</label>
+          <div className="space-y-3">
+            {clubData.pixKeys.map((pixKey, index) => (
+              <div key={pixKey.id} className="flex items-center space-x-2 p-3 border border-gray-300 rounded-lg">
+                <span className="text-sm font-medium text-gray-600 w-8">{index + 1}º</span>
+                <select
+                  value={pixKey.type}
+                  onChange={(e) => updatePixKey(pixKey.id, 'type', e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md"
+                >
+                  <option value="email">E-mail</option>
+                  <option value="phone">Celular</option>
+                  <option value="cnpj">CNPJ</option>
+                  <option value="random">Chave Aleatória</option>
+                </select>
+                <input
+                  type="text"
+                  value={pixKey.key}
+                  onChange={(e) => updatePixKey(pixKey.id, 'key', e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                  placeholder="Digite a chave PIX"
+                />
+                <button
+                  onClick={() => removePixKey(pixKey.id)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={addPixKey}
+              className="flex items-center text-primary-600 hover:text-primary-700"
+            >
+              <Plus size={20} className="mr-2" />
+              Adicionar Chave PIX
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Dados Financeiros</label>
+          <div className="bg-gray-100 p-6 rounded-lg">
+            <p className="text-gray-500 text-center">
+              Área para dados financeiros como Valor Recebido em Torneios será desenvolvida
+            </p>
+          </div>
+        </div>
+
+        <div className="pt-4">
+          <button
+            onClick={handleSaveProfile}
+            className="w-full bg-primary-600 text-white py-2 rounded-md hover:bg-primary-700"
+          >
+            Salvar Dados Financeiros
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderAccount = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-gray-800">Conta</h2>
+      
+      <div className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Email Atual</label>
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <span>{clubData.email || 'contato@clube.com'}</span>
+            <button className="text-primary-600 hover:text-primary-700 text-sm font-medium">
+              Alterar Email
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Alterar Senha</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Senha Atual</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={clubData.currentPassword}
+                  onChange={(e) => setClubData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Nova Senha</label>
+              <div className="relative">
+                <input
+                  type={showNewPassword ? "text" : "password"}
+                  value={clubData.newPassword}
+                  onChange={(e) => setClubData(prev => ({ ...prev, newPassword: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                >
+                  {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Confirmar Nova Senha</label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={clubData.confirmPassword}
+                  onChange={(e) => setClubData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                >
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            <button className="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700">
+              Alterar Senha
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -766,49 +1071,6 @@ const Settings: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Redes Sociais</label>
-            <div className="space-y-2">
-              <div className="flex items-center">
-                <Instagram size={20} className="text-gray-500 mr-2" />
-                <span className="text-gray-700">Instagram</span>
-                <button
-                  onClick={() => setShowSocialFields(prev => ({ ...prev, instagram: !prev.instagram }))}
-                  className="ml-2 text-primary-600 hover:text-primary-700"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-              {showSocialFields.instagram && renderEditableField('instagram', athleteData.instagram)}
-
-              <div className="flex items-center">
-                <Twitter size={20} className="text-gray-500 mr-2" />
-                <span className="text-gray-700">X</span>
-                <button
-                  onClick={() => setShowSocialFields(prev => ({ ...prev, twitter: !prev.twitter }))}
-                  className="ml-2 text-primary-600 hover:text-primary-700"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-              {showSocialFields.twitter && renderEditableField('twitter', athleteData.twitter)}
-
-              <div className="flex items-center">
-                <svg viewBox="0 0 24 24" width="20" height="20" className="text-gray-500 mr-2">
-                  <path fill="currentColor" d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.88 2.89 2.89 0 0 1-2.88-2.88 2.89 2.89 0 0 1 2.88-2.88c.28 0 .54.05.79.13v-3.31a6.07 6.07 0 0 0-.79-.05A6.21 6.21 0 0 0 3 16.13 6.21 6.21 0 0 0 9.2 22.34a6.21 6.21 0 0 0 6.21-6.21V9.04a8.16 8.16 0 0 0 4.18 1.12z"/>
-                </svg>
-                <span className="text-gray-700">TikTok</span>
-                <button
-                  onClick={() => setShowSocialFields(prev => ({ ...prev, threads: !prev.threads }))}
-                  className="ml-2 text-primary-600 hover:text-primary-700"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-              {showSocialFields.threads && renderEditableField('tiktok', athleteData.tiktok)}
-            </div>
-          </div>
-
-          <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Esportes</label>
             <div className="flex flex-wrap gap-2">
               {sports.map(sport => (
@@ -889,106 +1151,210 @@ const Settings: React.FC = () => {
   );
 
   const renderContent = () => {
-    switch (selectedSection) {
-      case 'profile':
-        return isClub ? renderClubProfile() : renderAthleteProfile();
-
-      case 'achievements':
-        if (isClub) return <div className="text-center text-gray-600 py-12">Seção não disponível para clubes</div>;
-        return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">Conquistas</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {achievements.map(achievement => (
-                <div
-                  key={achievement.id}
-                  className={`p-4 rounded-lg border ${
-                    achievement.earned
-                      ? 'border-primary-200 bg-primary-50'
-                      : 'border-gray-200 bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className={`p-2 rounded-full ${
-                      achievement.earned ? 'bg-primary-200' : 'bg-gray-200'
-                    }`}>
-                      <achievement.icon
-                        size={24}
-                        className={achievement.earned ? 'text-primary-600' : 'text-gray-500'}
-                      />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{achievement.title}</h3>
-                      <p className="text-sm text-gray-600">{achievement.description}</p>
-                    </div>
+    if (isClub) {
+      switch (selectedSection) {
+        case 'profile':
+          return renderClubProfile();
+        case 'structure':
+          return renderStructure();
+        case 'financial':
+          return renderFinancial();
+        case 'account':
+          return renderAccount();
+        case 'notifications':
+          return (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-800">Notificações</h2>
+              <div className="text-center text-gray-600 py-12">
+                A ser desenvolvido
+              </div>
+            </div>
+          );
+        case 'privacy':
+          return (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-800">Privacidade</h2>
+              {privacySettings.map((category, index) => (
+                <div key={index} className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-700">{category.category}</h3>
+                  <div className="space-y-3">
+                    {category.settings.map(setting => (
+                      <div key={setting.id} className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
+                        <div>
+                          <p className="font-medium text-gray-900">{setting.label}</p>
+                          <p className="text-sm text-gray-600">{setting.description}</p>
+                        </div>
+                        <div>
+                          {setting.isDestructive ? (
+                            <button className="px-4 py-2 border border-red-600 text-red-600 rounded-md hover:bg-red-50 transition-colors">
+                              Deletar Conta
+                            </button>
+                          ) : (
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={setting.enabled}
+                                onChange={() => {}}
+                                className="sr-only peer"
+                              />
+                              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                            </label>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-        );
-
-      case 'notifications':
-        return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">Notificações</h2>
-            {notificationSettings.map((category, index) => (
-              <div key={index} className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-700">{category.category}</h3>
-                <div className="space-y-3">
-                  {category.settings.map(setting => (
-                    <div key={setting.id} className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
-                      <div>
-                        <p className="font-medium text-gray-900">{setting.label}</p>
+          );
+        case 'permissions':
+          return (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-800">Permissões</h2>
+              <div className="text-center text-gray-600 py-12">
+                A ser desenvolvido
+              </div>
+            </div>
+          );
+        default:
+          return (
+            <div className="text-center text-gray-600 py-12">
+              Seção em desenvolvimento
+            </div>
+          );
+      }
+    } else {
+      // Athlete sections (existing code)
+      switch (selectedSection) {
+        case 'profile':
+          return renderAthleteProfile();
+        case 'achievements':
+          return (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-800">Conquistas</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {achievements.map(achievement => (
+                  <div
+                    key={achievement.id}
+                    className={`p-4 rounded-lg border ${
+                      achievement.earned
+                        ? 'border-primary-200 bg-primary-50'
+                        : 'border-gray-200 bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`p-2 rounded-full ${
+                        achievement.earned ? 'bg-primary-200' : 'bg-gray-200'
+                      }`}>
+                        <achievement.icon
+                          size={24}
+                          className={achievement.earned ? 'text-primary-600' : 'text-gray-500'}
+                        />
                       </div>
-                      <div className="flex items-center space-x-4">
-                        <label className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            checked={setting.email}
-                            onChange={() => {}}
-                            className="form-checkbox h-5 w-5 text-primary-600"
-                          />
-                          <span className="text-sm text-gray-600">Email</span>
-                        </label>
-                        <label className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            checked={setting.push}
-                            onChange={() => {}}
-                            className="form-checkbox h-5 w-5 text-primary-600"
-                          />
-                          <span className="text-sm text-gray-600">Push</span>
-                        </label>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{achievement.title}</h3>
+                        <p className="text-sm text-gray-600">{achievement.description}</p>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        );
-
-      case 'privacy':
-        return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">Privacidade</h2>
-            {privacySettings.map((category, index) => (
-              <div key={index} className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-700">{category.category}</h3>
-                <div className="space-y-3">
-                  {category.settings.map(setting => (
-                    <div key={setting.id} className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
-                      <div>
-                        <p className="font-medium text-gray-900">{setting.label}</p>
-                        <p className="text-sm text-gray-600">{setting.description}</p>
+            </div>
+          );
+        case 'notifications':
+          return (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-800">Notificações</h2>
+              {notificationSettings.map((category, index) => (
+                <div key={index} className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-700">{category.category}</h3>
+                  <div className="space-y-3">
+                    {category.settings.map(setting => (
+                      <div key={setting.id} className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
+                        <div>
+                          <p className="font-medium text-gray-900">{setting.label}</p>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <label className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              checked={setting.email}
+                              onChange={() => {}}
+                              className="form-checkbox h-5 w-5 text-primary-600"
+                            />
+                            <span className="text-sm text-gray-600">Email</span>
+                          </label>
+                          <label className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              checked={setting.push}
+                              onChange={() => {}}
+                              className="form-checkbox h-5 w-5 text-primary-600"
+                            />
+                            <span className="text-sm text-gray-600">Push</span>
+                          </label>
+                        </div>
                       </div>
-                      <div>
-                        {setting.isDestructive ? (
-                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-md hover:bg-red-50 transition-colors">
-                            Deletar Conta
-                          </button>
-                        ) : (
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        case 'privacy':
+          return (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-800">Privacidade</h2>
+              {privacySettings.map((category, index) => (
+                <div key={index} className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-700">{category.category}</h3>
+                  <div className="space-y-3">
+                    {category.settings.map(setting => (
+                      <div key={setting.id} className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
+                        <div>
+                          <p className="font-medium text-gray-900">{setting.label}</p>
+                          <p className="text-sm text-gray-600">{setting.description}</p>
+                        </div>
+                        <div>
+                          {setting.isDestructive ? (
+                            <button className="px-4 py-2 border border-red-600 text-red-600 rounded-md hover:bg-red-50 transition-colors">
+                              Deletar Conta
+                            </button>
+                          ) : (
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={setting.enabled}
+                                onChange={() => {}}
+                                className="sr-only peer"
+                              />
+                              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                            </label>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        case 'permissions':
+          return (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-800">Permissões</h2>
+              {permissionSettings.map((category, index) => (
+                <div key={index} className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-700">{category.category}</h3>
+                  <div className="space-y-3">
+                    {category.settings.map(setting => (
+                      <div key={setting.id} className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
+                        <div>
+                          <p className="font-medium text-gray-900">{setting.label}</p>
+                          <p className="text-sm text-gray-600">{setting.description}</p>
+                        </div>
+                        <div>
                           <label className="relative inline-flex items-center cursor-pointer">
                             <input
                               type="checkbox"
@@ -998,186 +1364,148 @@ const Settings: React.FC = () => {
                             />
                             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                           </label>
-                        )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        );
-
-      case 'permissions':
-        return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">Permissões</h2>
-            {permissionSettings.map((category, index) => (
-              <div key={index} className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-700">{category.category}</h3>
-                <div className="space-y-3">
-                  {category.settings.map(setting => (
-                    <div key={setting.id} className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
-                      <div>
-                        <p className="font-medium text-gray-900">{setting.label}</p>
-                        <p className="text-sm text-gray-600">{setting.description}</p>
-                      </div>
-                      <div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={setting.enabled}
-                            onChange={() => {}}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                        </label>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        );
-
-      case 'partners':
-        if (isClub) return <div className="text-center text-gray-600 py-12">Seção não disponível para clubes</div>;
-        return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">Parceiros de Jogo</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {partners.map(partner => (
-                <div key={partner.id} className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="flex items-center space-x-4">
-                    <img
-                      src={partner.image}
-                      alt={partner.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{partner.name}</h3>
-                      <p className="text-sm text-gray-600">
-                        {partner.tournaments} torneios juntos
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {partner.wins} vitórias em dupla
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Último jogo: {new Date(partner.lastPlayed).toLocaleDateString()}
-                      </p>
-                    </div>
+                    ))}
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-        );
-
-      case 'performance':
-        if (isClub) return <div className="text-center text-gray-600 py-12">Seção não disponível para clubes</div>;
-        return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">Minha Performance</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <h3 className="font-semibold text-gray-700 mb-2">Geral</h3>
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-600">
-                    Partidas: <span className="font-semibold">{performanceStats.overall.matches}</span>
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Vitórias: <span className="font-semibold text-primary-600">{performanceStats.overall.wins}</span>
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Taxa de vitória: <span className="font-semibold text-primary-600">{performanceStats.overall.winRate}%</span>
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <h3 className="font-semibold text-gray-700 mb-2">Este Mês</h3>
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-600">
-                    Partidas: <span className="font-semibold">{performanceStats.monthly.matches}</span>
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Vitórias: <span className="font-semibold">{performanceStats.monthly.wins}</span>
-                  </p>
-                  <p className="text-sm text-primary-600">
-                    Melhoria: <span className="font-semibold">+{performanceStats.monthly.improvement}%</span>
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <h3 className="font-semibold text-gray-700 mb-2">Média de Pontos</h3>
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-primary-600">
-                    {performanceStats.overall.averageScore}
-                  </p>
-                  <p className="text-sm text-gray-600">pontos por jogo</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <h3 className="font-semibold text-gray-700 mb-4">Habilidades</h3>
-              <div className="space-y-4">
-                {Object.entries(performanceStats.skills).map(([skill, value]) => (
-                  <div key={skill} className="space-y-1">
-                    <div className="flex justify-between">
-                      <span className="text-sm font-medium text-gray-600 capitalize">
-                        {skill}
-                      </span>
-                      <span className="text-sm text-gray-600">{value}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-primary-600 h-2 rounded-full"
-                        style={{ width: `${value}%` }}
-                      ></div>
+          );
+        case 'partners':
+          return (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-800">Parceiros de Jogo</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {partners.map(partner => (
+                  <div key={partner.id} className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="flex items-center space-x-4">
+                      <img
+                        src={partner.image}
+                        alt={partner.name}
+                        className="w-16 h-16 rounded-full object-cover"
+                      />
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{partner.name}</h3>
+                        <p className="text-sm text-gray-600">
+                          {partner.tournaments} torneios juntos
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {partner.wins} vitórias em dupla
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Último jogo: {new Date(partner.lastPlayed).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <h3 className="font-semibold text-gray-700 mb-4">Partidas Recentes</h3>
-              <div className="space-y-3">
-                {performanceStats.recentMatches.map(match => (
-                  <div
-                    key={match.id}
-                    className={`flex items-center justify-between p-3 rounded-lg ${
-                      match.result === 'win' ? 'bg-primary-50' : 'bg-red-50'
-                    }`}
-                  >
-                    <div>
-                      <span className={`font-medium ${
-                        match.result === 'win' ? 'text-primary-600' : 'text-red-600'
-                      }`}>
-                        {match.result === 'win' ? 'Vitória' : 'Derrota'}
-                      </span>
-                      <p className="text-sm text-gray-600">{match.score}</p>
-                    </div>
-                    <span className="text-sm text-gray-500">
-                      {new Date(match.date).toLocaleDateString()}
-                    </span>
+          );
+        case 'performance':
+          return (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-800">Minha Performance</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white p-4 rounded-lg border border-gray-200">
+                  <h3 className="font-semibold text-gray-700 mb-2">Geral</h3>
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600">
+                      Partidas: <span className="font-semibold">{performanceStats.overall.matches}</span>
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Vitórias: <span className="font-semibold text-primary-600">{performanceStats.overall.wins}</span>
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Taxa de vitória: <span className="font-semibold text-primary-600">{performanceStats.overall.winRate}%</span>
+                    </p>
                   </div>
-                ))}
+                </div>
+
+                <div className="bg-white p-4 rounded-lg border border-gray-200">
+                  <h3 className="font-semibold text-gray-700 mb-2">Este Mês</h3>
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600">
+                      Partidas: <span className="font-semibold">{performanceStats.monthly.matches}</span>
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Vitórias: <span className="font-semibold">{performanceStats.monthly.wins}</span>
+                    </p>
+                    <p className="text-sm text-primary-600">
+                      Melhoria: <span className="font-semibold">+{performanceStats.monthly.improvement}%</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-white p-4 rounded-lg border border-gray-200">
+                  <h3 className="font-semibold text-gray-700 mb-2">Média de Pontos</h3>
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-primary-600">
+                      {performanceStats.overall.averageScore}
+                    </p>
+                    <p className="text-sm text-gray-600">pontos por jogo</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-lg border border-gray-200">
+                <h3 className="font-semibold text-gray-700 mb-4">Habilidades</h3>
+                <div className="space-y-4">
+                  {Object.entries(performanceStats.skills).map(([skill, value]) => (
+                    <div key={skill} className="space-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-sm font-medium text-gray-600 capitalize">
+                          {skill}
+                        </span>
+                        <span className="text-sm text-gray-600">{value}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-primary-600 h-2 rounded-full"
+                          style={{ width: `${value}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-lg border border-gray-200">
+                <h3 className="font-semibold text-gray-700 mb-4">Partidas Recentes</h3>
+                <div className="space-y-3">
+                  {performanceStats.recentMatches.map(match => (
+                    <div
+                      key={match.id}
+                      className={`flex items-center justify-between p-3 rounded-lg ${
+                        match.result === 'win' ? 'bg-primary-50' : 'bg-red-50'
+                      }`}
+                    >
+                      <div>
+                        <span className={`font-medium ${
+                          match.result === 'win' ? 'text-primary-600' : 'text-red-600'
+                        }`}>
+                          {match.result === 'win' ? 'Vitória' : 'Derrota'}
+                        </span>
+                        <p className="text-sm text-gray-600">{match.score}</p>
+                      </div>
+                      <span className="text-sm text-gray-500">
+                        {new Date(match.date).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        );
-
-      default:
-        return (
-          <div className="text-center text-gray-600 py-12">
-            Seção em desenvolvimento
-          </div>
-        );
+          );
+        default:
+          return (
+            <div className="text-center text-gray-600 py-12">
+              Seção em desenvolvimento
+            </div>
+          );
+      }
     }
   };
 

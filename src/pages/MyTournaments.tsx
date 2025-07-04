@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import DashboardHeader from '../components/DashboardHeader';
 import { Plus, Calendar, Users, Trophy, Edit2, Trash2, Eye } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 interface Tournament {
   id: string;
@@ -24,7 +24,13 @@ const MyTournaments: React.FC = () => {
     // Load tournaments from localStorage
     const savedTournaments = localStorage.getItem('clubTournaments');
     if (savedTournaments) {
-      setTournaments(JSON.parse(savedTournaments));
+      const parsedTournaments = JSON.parse(savedTournaments).map((tournament: any) => ({
+        ...tournament,
+        registrationFee: parseFloat(tournament.registrationFee) || 0,
+        participantsCount: parseInt(tournament.participantsCount) || 0,
+        maxParticipants: parseInt(tournament.maxParticipants) || 0
+      }));
+      setTournaments(parsedTournaments);
     }
   }, []);
 
@@ -133,76 +139,91 @@ const MyTournaments: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTournaments.map((tournament) => (
-              <div key={tournament.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all border border-gray-100">
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-lg font-semibold text-dark-900 line-clamp-2">
-                      {tournament.name}
-                    </h3>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(tournament.status)}`}>
-                      {getStatusText(tournament.status)}
-                    </span>
-                  </div>
+              <Link 
+                key={tournament.id} 
+                to={`/tournament/${tournament.id}`}
+                className="block"
+              >
+                <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all border border-gray-100 cursor-pointer transform hover:-translate-y-1">
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-lg font-semibold text-dark-900 line-clamp-2">
+                        {tournament.name}
+                      </h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(tournament.status)}`}>
+                        {getStatusText(tournament.status)}
+                      </span>
+                    </div>
 
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center text-sm text-dark-600">
-                      <Calendar size={16} className="mr-2 text-primary-600" />
-                      {new Date(tournament.startDate).toLocaleDateString('pt-BR')} - {new Date(tournament.endDate).toLocaleDateString('pt-BR')}
-                    </div>
-                    <div className="flex items-center text-sm text-dark-600">
-                      <Users size={16} className="mr-2 text-primary-600" />
-                      {tournament.participantsCount} / {tournament.maxParticipants} participantes
-                    </div>
-                    <div className="flex items-center text-sm text-dark-600">
-                      <Trophy size={16} className="mr-2 text-primary-600" />
-                      R$ {tournament.registrationFee.toFixed(2)}
-                    </div>
-                  </div>
-
-                  <div className="mb-4">
-                    <p className="text-sm text-dark-600 mb-1">Categorias:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {tournament.categories.slice(0, 2).map((category, index) => (
-                        <span key={index} className="bg-primary-100 text-primary-700 px-2 py-1 rounded text-xs">
-                          {category}
-                        </span>
-                      ))}
-                      {tournament.categories.length > 2 && (
-                        <span className="bg-primary-100 text-primary-700 px-2 py-1 rounded text-xs">
-                          +{tournament.categories.length - 2}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <div className="flex space-x-2">
-                      <button className="p-2 text-dark-600 hover:text-primary-600 hover:bg-primary-50 rounded">
-                        <Eye size={16} />
-                      </button>
-                      <button className="p-2 text-dark-600 hover:text-accent-600 hover:bg-accent-50 rounded">
-                        <Edit2 size={16} />
-                      </button>
-                      <button className="p-2 text-dark-600 hover:text-red-600 hover:bg-red-50 rounded">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                    <div className="text-right">
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-accent-600 h-2 rounded-full"
-                          style={{ 
-                            width: `${Math.min((tournament.participantsCount / tournament.maxParticipants) * 100, 100)}%` 
-                          }}
-                        ></div>
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center text-sm text-dark-600">
+                        <Calendar size={16} className="mr-2 text-primary-600" />
+                        {new Date(tournament.startDate).toLocaleDateString('pt-BR')} - {new Date(tournament.endDate).toLocaleDateString('pt-BR')}
                       </div>
-                      <p className="text-xs text-dark-500 mt-1">
-                        {Math.round((tournament.participantsCount / tournament.maxParticipants) * 100)}% ocupado
-                      </p>
+                      <div className="flex items-center text-sm text-dark-600">
+                        <Users size={16} className="mr-2 text-primary-600" />
+                        {tournament.participantsCount} / {tournament.maxParticipants} participantes
+                      </div>
+                      <div className="flex items-center text-sm text-dark-600">
+                        <Trophy size={16} className="mr-2 text-primary-600" />
+                        R$ {tournament.registrationFee.toFixed(2)}
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <p className="text-sm text-dark-600 mb-1">Categorias:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {tournament.categories.slice(0, 2).map((category, index) => (
+                          <span key={index} className="bg-primary-100 text-primary-700 px-2 py-1 rounded text-xs">
+                            {category}
+                          </span>
+                        ))}
+                        {tournament.categories.length > 2 && (
+                          <span className="bg-primary-100 text-primary-700 px-2 py-1 rounded text-xs">
+                            +{tournament.categories.length - 2}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <div className="flex space-x-2">
+                        <button 
+                          className="p-2 text-dark-600 hover:text-primary-600 hover:bg-primary-50 rounded"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button 
+                          className="p-2 text-dark-600 hover:text-accent-600 hover:bg-accent-50 rounded"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button 
+                          className="p-2 text-dark-600 hover:text-red-600 hover:bg-red-50 rounded"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                      <div className="text-right">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-accent-600 h-2 rounded-full"
+                            style={{ 
+                              width: `${Math.min((tournament.participantsCount / tournament.maxParticipants) * 100, 100)}%` 
+                            }}
+                          ></div>
+                        </div>
+                        <p className="text-xs text-dark-500 mt-1">
+                          {Math.round((tournament.participantsCount / tournament.maxParticipants) * 100)}% ocupado
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
