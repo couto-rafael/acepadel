@@ -23,7 +23,8 @@ import {
   User,
   Building2,
   Plus,
-  X
+  X,
+  Search
 } from 'lucide-react';
 
 interface TournamentData {
@@ -54,6 +55,25 @@ interface Participant {
   partner: string;
   category: string;
   avatar: string;
+}
+
+interface Group {
+  id: string;
+  category: string;
+  groupName: string;
+  teams: Array<{ player1: string; player2: string; avatar: string }>;
+}
+
+interface Match {
+  id: string;
+  date: string;
+  time: string;
+  court: string;
+  team1: string;
+  team2: string;
+  category: string;
+  status: 'scheduled' | 'in-progress' | 'completed';
+  score?: string;
 }
 
 interface AIModalProps {
@@ -147,6 +167,14 @@ const TournamentDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showAIModal, setShowAIModal] = useState(false);
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [matches, setMatches] = useState<Match[]>([]);
+  
+  // Filter states
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDate, setSelectedDate] = useState('all');
+  const [selectedCourt, setSelectedCourt] = useState('all');
 
   useEffect(() => {
     // Check if there's a tab parameter in the URL
@@ -176,6 +204,18 @@ const TournamentDetail: React.FC = () => {
     const savedParticipants = localStorage.getItem(`tournament_${id}_participants`);
     if (savedParticipants) {
       setParticipants(JSON.parse(savedParticipants));
+    }
+
+    // Load groups from localStorage
+    const savedGroups = localStorage.getItem(`tournament_${id}_groups`);
+    if (savedGroups) {
+      setGroups(JSON.parse(savedGroups));
+    }
+
+    // Load matches from localStorage
+    const savedMatches = localStorage.getItem(`tournament_${id}_matches`);
+    if (savedMatches) {
+      setMatches(JSON.parse(savedMatches));
     }
 
     setLoading(false);
@@ -241,6 +281,82 @@ const TournamentDetail: React.FC = () => {
     localStorage.setItem(`tournament_${id}_participants`, JSON.stringify(updatedParticipants));
   };
 
+  const generateGroups = (category?: string) => {
+    const categoriesToGenerate = category ? [category] : tournament?.categories || [];
+    const newGroups: Group[] = [];
+
+    categoriesToGenerate.forEach(cat => {
+      const categoryParticipants = participants.filter(p => p.category === cat);
+      const teamsPerGroup = 4;
+      const numberOfGroups = Math.ceil(categoryParticipants.length / teamsPerGroup);
+
+      for (let i = 0; i < numberOfGroups; i++) {
+        const groupTeams = categoryParticipants
+          .slice(i * teamsPerGroup, (i + 1) * teamsPerGroup)
+          .map(p => ({
+            player1: p.name,
+            player2: p.partner,
+            avatar: p.avatar
+          }));
+
+        if (groupTeams.length > 0) {
+          newGroups.push({
+            id: `group_${cat}_${i + 1}`,
+            category: cat,
+            groupName: `Grupo ${String.fromCharCode(65 + i)}`,
+            teams: groupTeams
+          });
+        }
+      }
+    });
+
+    const updatedGroups = category 
+      ? [...groups.filter(g => g.category !== category), ...newGroups]
+      : newGroups;
+    
+    setGroups(updatedGroups);
+    localStorage.setItem(`tournament_${id}_groups`, JSON.stringify(updatedGroups));
+  };
+
+  const generateMatches = () => {
+    if (!tournament) return;
+
+    const newMatches: Match[] = [];
+    const courts = tournament.courts;
+    const schedules = tournament.dailySchedules;
+
+    groups.forEach(group => {
+      const teams = group.teams;
+      let matchIndex = 0;
+
+      // Generate round-robin matches for each group
+      for (let i = 0; i < teams.length; i++) {
+        for (let j = i + 1; j < teams.length; j++) {
+          const scheduleIndex = matchIndex % schedules.length;
+          const courtIndex = matchIndex % courts.length;
+          const timeSlots = ['08:00', '09:30', '11:00', '14:00', '15:30', '17:00'];
+          const timeIndex = matchIndex % timeSlots.length;
+
+          newMatches.push({
+            id: `match_${group.id}_${i}_${j}`,
+            date: schedules[scheduleIndex]?.date || tournament.startDate,
+            time: timeSlots[timeIndex],
+            court: courts[courtIndex]?.name || 'Quadra 1',
+            team1: `${teams[i].player1} / ${teams[i].player2}`,
+            team2: `${teams[j].player1} / ${teams[j].player2}`,
+            category: group.category,
+            status: 'scheduled'
+          });
+
+          matchIndex++;
+        }
+      }
+    });
+
+    setMatches(newMatches);
+    localStorage.setItem(`tournament_${id}_matches`, JSON.stringify(newMatches));
+  };
+
   const mainTabs = [
     { id: 'informacoes', label: 'Informações', icon: FileText },
     { id: 'inscritos', label: 'Inscritos', icon: Users },
@@ -256,12 +372,6 @@ const TournamentDetail: React.FC = () => {
     { id: 'localizacao', label: 'Localização' },
     { id: 'regras', label: 'Regras' },
     { id: 'faq', label: 'FAQ' }
-  ];
-
-  const mockMatches = [
-    { id: 1, time: '08:00', court: 'Quadra 1', team1: 'João & Maria', team2: 'Pedro & Ana', category: 'Open Masculina', status: 'scheduled' },
-    { id: 2, time: '09:30', court: 'Quadra 2', team1: 'Carlos & Julia', team2: 'Rafael & Camila', category: 'Mista A', status: 'in-progress' },
-    { id: 3, time: '11:00', court: 'Quadra 1', team1: 'Lucas & Bruno', team2: 'Diego & Felipe', category: 'Open Masculina', status: 'completed' }
   ];
 
   if (loading) {
@@ -537,10 +647,26 @@ const TournamentDetail: React.FC = () => {
           return acc;
         }, {} as Record<string, Participant[]>);
 
+        const filteredParticipants = participants.filter(participant => {
+          const matchesCategory = selectedCategory === 'all' || participant.category === selectedCategory;
+          const matchesSearch = searchTerm === '' || 
+            participant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            participant.partner.toLowerCase().includes(searchTerm.toLowerCase());
+          return matchesCategory && matchesSearch;
+        });
+
+        const filteredByCategory = filteredParticipants.reduce((acc, participant) => {
+          if (!acc[participant.category]) {
+            acc[participant.category] = [];
+          }
+          acc[participant.category].push(participant);
+          return acc;
+        }, {} as Record<string, Participant[]>);
+
         return (
           <div className="bg-white rounded-xl shadow-lg border border-gray-100">
             <div className="p-6 border-b border-gray-200">
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center mb-4">
                 <div>
                   <h3 className="text-lg font-bold text-dark-800">Participantes Inscritos</h3>
                   <p className="text-dark-600">{participants.length} duplas inscritas</p>
@@ -553,16 +679,60 @@ const TournamentDetail: React.FC = () => {
                   Dupla c/ AI
                 </button>
               </div>
+
+              {/* Search */}
+              <div className="mb-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type="text"
+                    placeholder="Buscar por nome do atleta..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+              </div>
+
+              {/* Category Tabs */}
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setSelectedCategory('all')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    selectedCategory === 'all'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-100 text-dark-600 hover:bg-primary-50 hover:text-primary-700'
+                  }`}
+                >
+                  Todas ({participants.length})
+                </button>
+                {tournament.categories.map(category => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      selectedCategory === category
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-gray-100 text-dark-600 hover:bg-primary-50 hover:text-primary-700'
+                    }`}
+                  >
+                    {category} ({participantsByCategory[category]?.length || 0})
+                  </button>
+                ))}
+              </div>
             </div>
+
             <div className="p-6">
-              {Object.keys(participantsByCategory).length === 0 ? (
+              {Object.keys(filteredByCategory).length === 0 ? (
                 <div className="text-center py-12">
                   <Users size={64} className="text-gray-300 mx-auto mb-4" />
-                  <p className="text-dark-500">Nenhuma dupla inscrita ainda</p>
+                  <p className="text-dark-500">
+                    {searchTerm ? 'Nenhum atleta encontrado com esse nome' : 'Nenhuma dupla inscrita ainda'}
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {Object.entries(participantsByCategory).map(([category, categoryParticipants]) => (
+                  {Object.entries(filteredByCategory).map(([category, categoryParticipants]) => (
                     <div key={category}>
                       <h4 className="text-lg font-semibold text-dark-800 mb-3 flex items-center">
                         <Trophy size={18} className="mr-2 text-primary-600" />
@@ -577,8 +747,9 @@ const TournamentDetail: React.FC = () => {
                               className="w-12 h-12 rounded-full object-cover mr-4"
                             />
                             <div>
-                              <h5 className="font-semibold text-dark-800">{participant.name}</h5>
-                              <p className="text-sm text-dark-600">Parceiro: {participant.partner}</p>
+                              <h5 className="font-semibold text-dark-800">
+                                {participant.name} / {participant.partner}
+                              </h5>
                             </div>
                           </div>
                         ))}
@@ -592,48 +763,326 @@ const TournamentDetail: React.FC = () => {
         );
 
       case 'grupos':
+        const groupsByCategory = groups.reduce((acc, group) => {
+          if (!acc[group.category]) {
+            acc[group.category] = [];
+          }
+          acc[group.category].push(group);
+          return acc;
+        }, {} as Record<string, Group[]>);
+
+        const filteredGroups = groups.filter(group => {
+          const matchesCategory = selectedCategory === 'all' || group.category === selectedCategory;
+          const matchesSearch = searchTerm === '' || 
+            group.teams.some(team => 
+              team.player1.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              team.player2.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+          return matchesCategory && matchesSearch;
+        });
+
+        const filteredGroupsByCategory = filteredGroups.reduce((acc, group) => {
+          if (!acc[group.category]) {
+            acc[group.category] = [];
+          }
+          acc[group.category].push(group);
+          return acc;
+        }, {} as Record<string, Group[]>);
+
         return (
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h3 className="text-lg font-bold text-dark-800 mb-4">Grupos e Chaveamento</h3>
-            <div className="text-center py-12">
-              <Target size={64} className="text-gray-300 mx-auto mb-4" />
-              <p className="text-dark-500">Os grupos serão definidos após o encerramento das inscrições</p>
+          <div className="bg-white rounded-xl shadow-lg border border-gray-100">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-dark-800">Grupos e Chaveamento</h3>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => generateGroups(selectedCategory === 'all' ? undefined : selectedCategory)}
+                    className="bg-gradient-to-r from-primary-900 to-primary-700 text-white px-4 py-2 rounded-lg hover:from-primary-800 hover:to-primary-600 transition-all duration-300 flex items-center font-semibold"
+                  >
+                    <Target size={16} className="mr-2" />
+                    {selectedCategory === 'all' ? 'Gerar Todas' : 'Gerar Categoria'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Search */}
+              <div className="mb-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type="text"
+                    placeholder="Buscar por nome do atleta..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+              </div>
+
+              {/* Category Tabs */}
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setSelectedCategory('all')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    selectedCategory === 'all'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-100 text-dark-600 hover:bg-primary-50 hover:text-primary-700'
+                  }`}
+                >
+                  Todas ({groups.length})
+                </button>
+                {tournament.categories.map(category => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      selectedCategory === category
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-gray-100 text-dark-600 hover:bg-primary-50 hover:text-primary-700'
+                    }`}
+                  >
+                    {category} ({groupsByCategory[category]?.length || 0})
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-6">
+              {Object.keys(filteredGroupsByCategory).length === 0 ? (
+                <div className="text-center py-12">
+                  <Target size={64} className="text-gray-300 mx-auto mb-4" />
+                  <p className="text-dark-500">
+                    {searchTerm ? 'Nenhum grupo encontrado' : 'Os grupos serão definidos após gerar o chaveamento'}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {Object.entries(filteredGroupsByCategory).map(([category, categoryGroups]) => (
+                    <div key={category}>
+                      <h4 className="text-lg font-semibold text-dark-800 mb-3 flex items-center">
+                        <Trophy size={18} className="mr-2 text-primary-600" />
+                        {category}
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {categoryGroups.map(group => (
+                          <div key={group.id} className="bg-gray-50 rounded-lg p-4">
+                            <h5 className="font-semibold text-dark-800 mb-3">{group.groupName}</h5>
+                            <div className="space-y-2">
+                              {group.teams.map((team, index) => (
+                                <div key={index} className="flex items-center">
+                                  <img
+                                    src={team.avatar}
+                                    alt={team.player1}
+                                    className="w-8 h-8 rounded-full object-cover mr-3"
+                                  />
+                                  <span className="text-sm text-dark-700">
+                                    {team.player1} / {team.player2}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         );
 
       case 'jogos':
+        const matchesByDate = matches.reduce((acc, match) => {
+          if (!acc[match.date]) {
+            acc[match.date] = [];
+          }
+          acc[match.date].push(match);
+          return acc;
+        }, {} as Record<string, Match[]>);
+
+        const matchesByCourt = matches.reduce((acc, match) => {
+          if (!acc[match.court]) {
+            acc[match.court] = [];
+          }
+          acc[match.court].push(match);
+          return acc;
+        }, {} as Record<string, Match[]>);
+
+        const filteredMatches = matches.filter(match => {
+          const matchesCategory = selectedCategory === 'all' || match.category === selectedCategory;
+          const matchesDate = selectedDate === 'all' || match.date === selectedDate;
+          const matchesCourt = selectedCourt === 'all' || match.court === selectedCourt;
+          const matchesSearch = searchTerm === '' || 
+            match.team1.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            match.team2.toLowerCase().includes(searchTerm.toLowerCase());
+          return matchesCategory && matchesDate && matchesCourt && matchesSearch;
+        });
+
+        const uniqueDates = [...new Set(matches.map(m => m.date))];
+        const uniqueCourts = [...new Set(matches.map(m => m.court))];
+
         return (
           <div className="bg-white rounded-xl shadow-lg border border-gray-100">
             <div className="p-6 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-dark-800">Programação de Jogos</h3>
-              <p className="text-dark-600">Próximas partidas agendadas</p>
-            </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                {mockMatches.map(match => (
-                  <div key={match.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <div className="text-center">
-                        <Clock size={16} className="text-primary-600 mx-auto mb-1" />
-                        <span className="text-sm font-semibold">{match.time}</span>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-dark-800">{match.team1} vs {match.team2}</h4>
-                        <p className="text-sm text-dark-600">{match.court} • {match.category}</p>
-                      </div>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      match.status === 'scheduled' ? 'bg-yellow-100 text-yellow-800' :
-                      match.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {match.status === 'scheduled' ? 'Agendado' :
-                       match.status === 'in-progress' ? 'Em Andamento' : 'Finalizado'}
-                    </span>
-                  </div>
-                ))}
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-dark-800">Programação de Jogos</h3>
+                <button
+                  onClick={generateMatches}
+                  className="bg-gradient-to-r from-primary-900 to-primary-700 text-white px-4 py-2 rounded-lg hover:from-primary-800 hover:to-primary-600 transition-all duration-300 flex items-center font-semibold"
+                >
+                  <Trophy size={16} className="mr-2" />
+                  Gerar Jogos
+                </button>
               </div>
+
+              {/* Search */}
+              <div className="mb-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type="text"
+                    placeholder="Buscar por nome do atleta..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+              </div>
+
+              {/* Filter Tabs */}
+              <div className="space-y-4">
+                {/* Category Tabs */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Categorias</label>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setSelectedCategory('all')}
+                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                        selectedCategory === 'all'
+                          ? 'bg-primary-600 text-white'
+                          : 'bg-gray-100 text-dark-600 hover:bg-primary-50 hover:text-primary-700'
+                      }`}
+                    >
+                      Todas
+                    </button>
+                    {tournament.categories.map(category => (
+                      <button
+                        key={category}
+                        onClick={() => setSelectedCategory(category)}
+                        className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                          selectedCategory === category
+                            ? 'bg-primary-600 text-white'
+                            : 'bg-gray-100 text-dark-600 hover:bg-primary-50 hover:text-primary-700'
+                        }`}
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Date Tabs */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Datas</label>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setSelectedDate('all')}
+                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                        selectedDate === 'all'
+                          ? 'bg-accent-600 text-white'
+                          : 'bg-gray-100 text-dark-600 hover:bg-accent-50 hover:text-accent-700'
+                      }`}
+                    >
+                      Todas
+                    </button>
+                    {uniqueDates.map(date => (
+                      <button
+                        key={date}
+                        onClick={() => setSelectedDate(date)}
+                        className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                          selectedDate === date
+                            ? 'bg-accent-600 text-white'
+                            : 'bg-gray-100 text-dark-600 hover:bg-accent-50 hover:text-accent-700'
+                        }`}
+                      >
+                        {new Date(date).toLocaleDateString('pt-BR')}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Court Tabs */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Quadras</label>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setSelectedCourt('all')}
+                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                        selectedCourt === 'all'
+                          ? 'bg-primary-600 text-white'
+                          : 'bg-gray-100 text-dark-600 hover:bg-primary-50 hover:text-primary-700'
+                      }`}
+                    >
+                      Todas
+                    </button>
+                    {uniqueCourts.map(court => (
+                      <button
+                        key={court}
+                        onClick={() => setSelectedCourt(court)}
+                        className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                          selectedCourt === court
+                            ? 'bg-primary-600 text-white'
+                            : 'bg-gray-100 text-dark-600 hover:bg-primary-50 hover:text-primary-700'
+                        }`}
+                      >
+                        {court}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6">
+              {filteredMatches.length === 0 ? (
+                <div className="text-center py-12">
+                  <Trophy size={64} className="text-gray-300 mx-auto mb-4" />
+                  <p className="text-dark-500">
+                    {searchTerm ? 'Nenhuma partida encontrada' : 'As partidas serão geradas após criar os grupos'}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredMatches.map(match => (
+                    <div key={match.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div className="text-center">
+                          <Clock size={16} className="text-primary-600 mx-auto mb-1" />
+                          <span className="text-sm font-semibold">{match.time}</span>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-dark-800">{match.team1} vs {match.team2}</h4>
+                          <p className="text-sm text-dark-600">
+                            {match.court} • {match.category} • {new Date(match.date).toLocaleDateString('pt-BR')}
+                          </p>
+                          {match.score && (
+                            <p className="text-sm text-primary-600 font-semibold">{match.score}</p>
+                          )}
+                        </div>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        match.status === 'scheduled' ? 'bg-yellow-100 text-yellow-800' :
+                        match.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {match.status === 'scheduled' ? 'Agendado' :
+                         match.status === 'in-progress' ? 'Em Andamento' : 'Finalizado'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         );
