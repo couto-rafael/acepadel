@@ -151,7 +151,7 @@ const DashboardHeader: React.FC = () => {
               >
                 <button
                   className="flex items-center text-dark-700 hover:text-primary-900 font-medium transition-colors"
-                  onMouseEnter={() => setIsDashboardMenuOpen(true)}
+                  onClick={() => setIsDashboardMenuOpen(!isDashboardMenuOpen)}
                 >
                   Dashboard
                   <ChevronDown size={16} className="ml-1" />
@@ -159,7 +159,6 @@ const DashboardHeader: React.FC = () => {
                 {isDashboardMenuOpen && (
                   <div 
                     className="absolute mt-2 w-48 bg-white rounded-lg shadow-xl py-1 z-50 border border-gray-100 animate-fade-in"
-                    onMouseLeave={() => setIsDashboardMenuOpen(false)}
                   >
                     <button 
                       onClick={handleDashboardClick}
@@ -187,7 +186,7 @@ const DashboardHeader: React.FC = () => {
               >
                 <button
                   className="flex items-center text-dark-700 hover:text-primary-900 font-medium transition-colors"
-                  onMouseEnter={() => setIsTournamentsMenuOpen(true)}
+                  onClick={() => setIsTournamentsMenuOpen(!isTournamentsMenuOpen)}
                 >
                   Torneios
                   <ChevronDown size={16} className="ml-1" />
@@ -195,7 +194,6 @@ const DashboardHeader: React.FC = () => {
                 {isTournamentsMenuOpen && (
                   <div 
                     className="absolute mt-2 w-48 bg-white rounded-lg shadow-xl py-1 z-50 border border-gray-100 animate-fade-in"
-                    onMouseLeave={() => setIsTournamentsMenuOpen(false)}
                   >
                     {isClub ? (
                       <>
