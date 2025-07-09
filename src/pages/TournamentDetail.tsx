@@ -800,12 +800,130 @@ const TournamentDetail: React.FC = () => {
       </div>
 
       {/* Matches content */}
-      <div className="text-center py-12">
-        <Play size={64} className="text-gray-300 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-dark-900 mb-2">Nenhum jogo programado</h3>
-        <p className="text-dark-500">
-          Os jogos serão gerados após a criação dos grupos.
-        </p>
+      <div className="space-y-4">
+        {/* Mock matches data */}
+        {[
+          {
+            id: 'MATCH001',
+            team1: 'João Silva / Pedro Santos',
+            team2: 'Carlos Lima / Rafael Dias',
+            score: '6-4, 6-3',
+            court: 'Quadra 1',
+            date: '11/07/2025',
+            time: '09:00',
+            category: 'Open Masculina',
+            group: 'Chave A',
+            status: 'completed'
+          },
+          {
+            id: 'MATCH002',
+            team1: 'Maria Costa / Ana Lima',
+            team2: 'Julia Rocha / Camila Souza',
+            score: '',
+            court: 'Quadra 2',
+            date: '11/07/2025',
+            time: '10:30',
+            category: 'Open Feminina',
+            group: 'Chave B',
+            status: 'scheduled'
+          },
+          {
+            id: 'MATCH003',
+            team1: 'Bruno Alves / Diego Santos',
+            team2: 'Lucas Ferreira / Thiago Costa',
+            score: '4-6, 6-7',
+            court: 'Quadra 3',
+            date: '12/07/2025',
+            time: '14:00',
+            category: '2ª Masculina',
+            group: 'Chave A',
+            status: 'completed'
+          }
+        ]
+        .filter(match => {
+          const matchesDate = selectedDate === 'all' || match.date === selectedDate;
+          const matchesCourt = selectedCourt === 'all' || match.court === selectedCourt;
+          const matchesSearch = searchTerm === '' || 
+            match.team1.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            match.team2.toLowerCase().includes(searchTerm.toLowerCase());
+          return matchesDate && matchesCourt && matchesSearch;
+        })
+        .map(match => (
+          <div key={match.id} className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-4">
+                <div className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-sm font-semibold">
+                  {match.id}
+                </div>
+                <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  match.status === 'completed' 
+                    ? 'bg-accent-100 text-accent-700' 
+                    : 'bg-yellow-100 text-yellow-700'
+                }`}>
+                  {match.status === 'completed' ? 'Finalizado' : 'Agendado'}
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex-1 text-center">
+                <div className="font-bold text-dark-900 mb-1">
+                  {match.team1.split(' / ')[0]} / {match.team1.split(' / ')[1]}
+                </div>
+              </div>
+              <div className="mx-6">
+                {match.status === 'completed' ? (
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-dark-900">{match.score}</div>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary-600">vs</div>
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 text-center">
+                <div className="font-bold text-dark-900 mb-1">
+                  {match.team2.split(' / ')[0]} / {match.team2.split(' / ')[1]}
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm text-dark-600">
+              <div>
+                <span className="font-medium">Quadra:</span>
+                <div className="text-dark-900">{match.court}</div>
+              </div>
+              <div>
+                <span className="font-medium">Data:</span>
+                <div className="text-dark-900">{match.date}</div>
+              </div>
+              <div>
+                <span className="font-medium">Horário:</span>
+                <div className="text-dark-900">{match.time}</div>
+              </div>
+              <div>
+                <span className="font-medium">Categoria:</span>
+                <div className="text-dark-900">{match.category}</div>
+              </div>
+              <div>
+                <span className="font-medium">Grupo:</span>
+                <div className="text-dark-900">{match.group}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+        
+        {/* Empty state if no matches found */}
+        {[].length === 0 && (
+          <div className="text-center py-12">
+            <Play size={64} className="text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-dark-900 mb-2">Nenhum jogo encontrado</h3>
+            <p className="text-dark-500">
+              Tente ajustar os filtros ou aguarde a programação dos jogos.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -971,12 +1089,12 @@ const TournamentDetail: React.FC = () => {
               
               <div className="mt-6 lg:mt-0">
                 {isCreator ? (
-                  <button className="bg-accent-500 text-dark-900 px-6 py-3 rounded-lg font-semibold hover:bg-accent-400 transition-all duration-300 shadow-lg flex items-center">
+                  <button className="bg-accent-500 text-dark-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent-400 transition-all duration-300 shadow-xl flex items-center">
                     <Edit2 size={20} className="mr-2" />
                     Editar
                   </button>
                 ) : isAthlete ? (
-                  <button className="bg-accent-500 text-dark-900 px-6 py-3 rounded-lg font-semibold hover:bg-accent-400 transition-all duration-300 shadow-lg flex items-center">
+                  <button className="bg-accent-500 text-dark-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent-400 transition-all duration-300 shadow-xl flex items-center">
                     <Zap size={20} className="mr-2" />
                     Inscrever-se
                   </button>

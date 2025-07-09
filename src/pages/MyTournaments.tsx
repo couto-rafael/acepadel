@@ -19,6 +19,7 @@ interface Tournament {
 const MyTournaments: React.FC = () => {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [filter, setFilter] = useState<'all' | 'open' | 'in-progress' | 'completed' | 'scheduled'>('all');
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Load tournaments from localStorage
