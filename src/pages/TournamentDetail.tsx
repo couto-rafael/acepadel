@@ -971,12 +971,12 @@ const TournamentDetail: React.FC = () => {
               
               <div className="mt-6 lg:mt-0">
                 {isCreator ? (
-                  <button className="bg-accent-500 text-dark-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent-400 transition-all duration-300 shadow-xl flex items-center">
+                  <button className="bg-accent-500 text-dark-900 px-6 py-3 rounded-lg font-semibold hover:bg-accent-400 transition-all duration-300 shadow-lg flex items-center">
                     <Edit2 size={20} className="mr-2" />
                     Editar
                   </button>
                 ) : isAthlete ? (
-                  <button className="bg-accent-500 text-dark-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent-400 transition-all duration-300 shadow-xl flex items-center">
+                  <button className="bg-accent-500 text-dark-900 px-6 py-3 rounded-lg font-semibold hover:bg-accent-400 transition-all duration-300 shadow-lg flex items-center">
                     <Zap size={20} className="mr-2" />
                     Inscrever-se
                   </button>
