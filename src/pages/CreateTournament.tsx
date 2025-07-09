@@ -40,6 +40,7 @@ interface TournamentData {
   bannerImage: string | null;
   sponsors: Array<{ id: string; name: string; image: string }>;
   streamingLinks: Array<{ courtId: string; courtName: string; link: string }>;
+  hasParticipantLimit: boolean;
 }
 
 const CreateTournament: React.FC = () => {
@@ -62,6 +63,7 @@ const CreateTournament: React.FC = () => {
     bannerImage: null,
     sponsors: [],
     streamingLinks: []
+    hasParticipantLimit: false
   });
 
   const tabs = [
@@ -380,6 +382,33 @@ const CreateTournament: React.FC = () => {
               />
             </div>
 
+            <div>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={tournamentData.hasParticipantLimit}
+                  onChange={(e) => handleInputChange('hasParticipantLimit', e.target.checked)}
+                  className="form-checkbox h-5 w-5 text-primary-600 rounded focus:ring-primary-500 mr-3"
+                />
+                <span className="text-sm font-semibold text-dark-700">Limite de Inscritos?</span>
+              </label>
+              {tournamentData.hasParticipantLimit && (
+                <div className="mt-3">
+                  <label className="block text-sm font-semibold text-dark-700 mb-2">
+                    Número máximo de duplas
+                  </label>
+                  <input
+                    type="number"
+                    min="4"
+                    max="128"
+                    value={tournamentData.maxParticipants || ''}
+                    onChange={(e) => handleInputChange('maxParticipants', parseInt(e.target.value) || null)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                    placeholder="Ex: 64"
+                  />
+                </div>
+              )}
+            </div>
             <div className="flex justify-end">
               <button
                 onClick={nextTab}

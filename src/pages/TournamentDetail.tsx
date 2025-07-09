@@ -168,6 +168,7 @@ const TournamentDetail: React.FC = () => {
     description: 'Torneio aberto para todas as categorias',
     categories: ['Open Masculina', 'Open Feminina', '2ª Masc', '2ª Fem', '3ª Masc', '3ª Fem', '4ª Masc', '4ª Fem', '5ª Masc', '5ª Fem', '6ª Masc', '6ª Fem', '7ª Masc', '7ª Fem', 'Mista A', 'Mista B', 'Mista C', 'Mista D'],
     maxParticipants: 64,
+    hasParticipantLimit: true,
     courts: ['Quadra 1', 'Quadra 2', 'Quadra 3', 'Quadra 4'],
     dates: ['11/07/2025', '12/07/2025', '13/07/2025'],
     createdBy: 'clube@teste.com' // Mock club email
@@ -871,7 +872,7 @@ const TournamentDetail: React.FC = () => {
                   R$ {tournament.registrationFee.toFixed(2)}
                 </span>
               </div>
-              {tournament.maxParticipants && (
+              {tournament.hasParticipantLimit && tournament.maxParticipants && (
                 <>
                   <div className="flex justify-between">
                     <span className="text-dark-600">Vagas:</span>
