@@ -19,7 +19,10 @@ import {
   Edit2,
   Filter,
   ChevronDown,
-  X
+  X,
+  Crown,
+  Medal,
+  Video
 } from 'lucide-react';
 
 interface Participant {
@@ -55,11 +58,31 @@ interface Group {
   }[];
 }
 
+interface Match {
+  id: string;
+  team1: string;
+  team2: string;
+  score: string;
+  court: string;
+  date: string;
+  time: string;
+  category: string;
+  group: string;
+  status: 'scheduled' | 'completed';
+}
+
 interface AIParticipantsModalProps {
   isOpen: boolean;
   onClose: () => void;
   categories: string[];
   onConfirm: (quantity: number, category: string) => void;
+}
+
+interface ScoreModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  match: Match | null;
+  onSave: (matchId: string, score: string) => void;
 }
 
 const AIParticipantsModal: React.FC<AIParticipantsModalProps> = ({ isOpen, onClose, categories, onConfirm }) => {
@@ -139,6 +162,137 @@ const AIParticipantsModal: React.FC<AIParticipantsModalProps> = ({ isOpen, onClo
   );
 };
 
+const ScoreModal: React.FC<ScoreModalProps> = ({ isOpen, onClose, match, onSave }) => {
+  const [set1Team1, setSet1Team1] = useState('');
+  const [set1Team2, setSet1Team2] = useState('');
+  const [set2Team1, setSet2Team1] = useState('');
+  const [set2Team2, setSet2Team2] = useState('');
+  const [set3Team1, setSet3Team1] = useState('');
+  const [set3Team2, setSet3Team2] = useState('');
+
+  if (!isOpen || !match) return null;
+
+  const handleSave = () => {
+    const sets = [];
+    if (set1Team1 && set1Team2) sets.push(`${set1Team1}-${set1Team2}`);
+    if (set2Team1 && set2Team2) sets.push(`${set2Team1}-${set2Team2}`);
+    if (set3Team1 && set3Team2) sets.push(`${set3Team1}-${set3Team2}`);
+    
+    const score = sets.join(', ');
+    onSave(match.id, score);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-dark-800">Inserir Placar</h3>
+          <button onClick={onClose} className="text-dark-400 hover:text-dark-600">
+            <X size={20} />
+          </button>
+        </div>
+        
+        <div className="mb-4">
+          <p className="text-sm text-dark-600">{match.team1} vs {match.team2}</p>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-dark-700 mb-2">1º Set</label>
+            <div className="flex space-x-2">
+              <input
+                type="number"
+                min="0"
+                max="7"
+                value={set1Team1}
+                onChange={(e) => setSet1Team1(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                placeholder="0"
+              />
+              <span className="flex items-center">x</span>
+              <input
+                type="number"
+                min="0"
+                max="7"
+                value={set1Team2}
+                onChange={(e) => setSet1Team2(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-dark-700 mb-2">2º Set</label>
+            <div className="flex space-x-2">
+              <input
+                type="number"
+                min="0"
+                max="7"
+                value={set2Team1}
+                onChange={(e) => setSet2Team1(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                placeholder="0"
+              />
+              <span className="flex items-center">x</span>
+              <input
+                type="number"
+                min="0"
+                max="7"
+                value={set2Team2}
+                onChange={(e) => setSet2Team2(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-dark-700 mb-2">3º Set (opcional)</label>
+            <div className="flex space-x-2">
+              <input
+                type="number"
+                min="0"
+                max="7"
+                value={set3Team1}
+                onChange={(e) => setSet3Team1(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                placeholder="0"
+              />
+              <span className="flex items-center">x</span>
+              <input
+                type="number"
+                min="0"
+                max="7"
+                value={set3Team2}
+                onChange={(e) => setSet3Team2(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                placeholder="0"
+              />
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex justify-end space-x-3 mt-6">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 border border-gray-300 rounded-lg text-dark-600 hover:bg-gray-50 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+          >
+            Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const TournamentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -150,8 +304,11 @@ const TournamentDetail: React.FC = () => {
   const [selectedCourt, setSelectedCourt] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showAIModal, setShowAIModal] = useState(false);
+  const [showScoreModal, setShowScoreModal] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
+  const [matches, setMatches] = useState<Match[]>([]);
   const [showCategoryFilter, setShowCategoryFilter] = useState(false);
   const [showDateFilter, setShowDateFilter] = useState(false);
   const [showCourtFilter, setShowCourtFilter] = useState(false);
@@ -180,6 +337,48 @@ const TournamentDetail: React.FC = () => {
   // Check if current user is the tournament creator
   const isCreator = user && profile?.user_type === 'club' && profile.email === tournament.createdBy;
   const isAthlete = user && profile?.user_type === 'athlete';
+
+  // Initialize mock matches
+  useEffect(() => {
+    setMatches([
+      {
+        id: 'MATCH001',
+        team1: 'João Silva / Pedro Santos',
+        team2: 'Carlos Lima / Rafael Dias',
+        score: '6-4, 6-3',
+        court: 'Quadra 1',
+        date: '11/07/2025',
+        time: '09:00',
+        category: 'Open Masculina',
+        group: 'Chave A',
+        status: 'completed'
+      },
+      {
+        id: 'MATCH002',
+        team1: 'Maria Costa / Ana Lima',
+        team2: 'Julia Rocha / Camila Souza',
+        score: '',
+        court: 'Quadra 2',
+        date: '11/07/2025',
+        time: '10:30',
+        category: 'Open Feminina',
+        group: 'Chave B',
+        status: 'scheduled'
+      },
+      {
+        id: 'MATCH003',
+        team1: 'Bruno Alves / Diego Santos',
+        team2: 'Lucas Ferreira / Thiago Costa',
+        score: '4-6, 6-7',
+        court: 'Quadra 3',
+        date: '12/07/2025',
+        time: '14:00',
+        category: '2ª Masculina',
+        group: 'Chave A',
+        status: 'completed'
+      }
+    ]);
+  }, []);
 
   // Get categories with registered participants
   const categoriesWithRegistrations = tournament.categories.filter(category => 
@@ -255,10 +454,10 @@ const TournamentDetail: React.FC = () => {
         });
 
         // Generate matches between teams in the group
-        const matches = [];
+        const groupMatches = [];
         for (let j = 0; j < teams.length; j++) {
           for (let k = j + 1; k < teams.length; k++) {
-            matches.push({
+            groupMatches.push({
               id: `match-${i}-${j}-${k}`,
               team1: teams[j].name,
               team2: teams[k].name,
@@ -275,7 +474,7 @@ const TournamentDetail: React.FC = () => {
           id: `group-${cat}-${i}`,
           name: groupName,
           teams,
-          matches
+          matches: groupMatches
         });
       }
     });
@@ -285,6 +484,19 @@ const TournamentDetail: React.FC = () => {
     } else {
       setGroups(newGroups);
     }
+  };
+
+  const handleEditMatch = (match: Match) => {
+    setSelectedMatch(match);
+    setShowScoreModal(true);
+  };
+
+  const handleSaveScore = (matchId: string, score: string) => {
+    setMatches(prev => prev.map(match => 
+      match.id === matchId 
+        ? { ...match, score, status: 'completed' as const }
+        : match
+    ));
   };
 
   const renderParticipantsTab = () => (
@@ -551,44 +763,51 @@ const TournamentDetail: React.FC = () => {
 
       {/* Groups display */}
       {groups.length > 0 ? (
-        <div className="space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {groups
             .filter(group => selectedCategory === 'all' || group.name.includes(selectedCategory))
             .map(group => (
               <div key={group.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-                <div className="bg-primary-600 text-white px-6 py-4">
+                <div className="bg-primary-600 text-white px-4 py-3">
                   <h3 className="text-lg font-bold">{group.name}</h3>
                 </div>
                 
                 {/* Group standings table */}
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full text-sm">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dupla</th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Vitórias</th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Saldo Sets</th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Saldo Games</th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Games a Favor</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Dupla</th>
+                        <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">V</th>
+                        <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">S.Sets</th>
+                        <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">S.Games</th>
+                        <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase">G.Favor</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {group.teams.map((team, index) => (
-                        <tr key={index} className={index === 0 ? 'bg-accent-50' : ''}>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                        <tr key={index} className={
+                          index === 0 ? 'bg-accent-50' : 
+                          index === 1 ? 'bg-green-50' : 
+                          index === 2 ? 'bg-red-50' : ''
+                        }>
+                          <td className="px-3 py-2">
                             <div className="flex items-center">
-                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 ${
-                                index === 0 ? 'bg-accent-500 text-dark-900' : 'bg-gray-200 text-gray-600'
+                              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mr-2 ${
+                                index === 0 ? 'bg-accent-500 text-dark-900' : 
+                                index === 1 ? 'bg-green-500 text-white' :
+                                index === 2 ? 'bg-red-500 text-white' :
+                                'bg-gray-200 text-gray-600'
                               }`}>
                                 {index + 1}
                               </div>
-                              <span className="text-sm font-medium text-dark-900">{team.name}</span>
+                              <span className="text-xs font-medium text-dark-900 truncate">{team.name}</span>
                             </div>
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-center text-sm font-semibold text-dark-900">{team.wins}</td>
-                          <td className="px-4 py-4 whitespace-nowrap text-center text-sm text-dark-900">{team.setBalance > 0 ? '+' : ''}{team.setBalance}</td>
-                          <td className="px-4 py-4 whitespace-nowrap text-center text-sm text-dark-900">{team.gameBalance > 0 ? '+' : ''}{team.gameBalance}</td>
-                          <td className="px-4 py-4 whitespace-nowrap text-center text-sm text-dark-900">{team.gamesWon}</td>
+                          <td className="px-2 py-2 text-center text-sm font-semibold text-dark-900">{team.wins}</td>
+                          <td className="px-2 py-2 text-center text-sm text-dark-900">{team.setBalance > 0 ? '+' : ''}{team.setBalance}</td>
+                          <td className="px-2 py-2 text-center text-sm text-dark-900">{team.gameBalance > 0 ? '+' : ''}{team.gameBalance}</td>
+                          <td className="px-2 py-2 text-center text-sm text-dark-900">{team.gamesWon}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -596,24 +815,24 @@ const TournamentDetail: React.FC = () => {
                 </div>
 
                 {/* Group matches */}
-                <div className="px-6 py-4 border-t border-gray-200">
-                  <h4 className="text-sm font-semibold text-dark-800 mb-3">Jogos</h4>
+                <div className="px-4 py-3 border-t border-gray-200">
+                  <h4 className="text-sm font-semibold text-dark-800 mb-2">Jogos</h4>
                   <div className="space-y-2">
                     {group.matches.map(match => (
-                      <div key={match.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div key={match.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-xs">
                         <div className="flex-1">
-                          <div className="text-sm font-medium text-dark-900">
-                            {match.team1} vs {match.team2}
+                          <div className="font-medium text-dark-900 truncate">
+                            {match.team1.split(' / ')[0]} / {match.team1.split(' / ')[1]} vs {match.team2.split(' / ')[0]} / {match.team2.split(' / ')[1]}
                           </div>
-                          <div className="text-xs text-dark-500">
+                          <div className="text-dark-500">
                             {match.date} • {match.time} • {match.court}
                           </div>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right ml-2">
                           {match.status === 'completed' ? (
-                            <span className="text-sm font-semibold text-dark-900">{match.score}</span>
+                            <span className="font-semibold text-dark-900">{match.score}</span>
                           ) : (
-                            <span className="text-xs text-primary-600 font-medium">Agendado</span>
+                            <span className="text-primary-600 font-medium">Agendado</span>
                           )}
                         </div>
                       </div>
@@ -803,122 +1022,94 @@ const TournamentDetail: React.FC = () => {
       </div>
 
       {/* Matches content */}
-      <div className="space-y-4">
-        {/* Mock matches data */}
-        {[
-          {
-            id: 'MATCH001',
-            team1: 'João Silva / Pedro Santos',
-            team2: 'Carlos Lima / Rafael Dias',
-            score: '6-4, 6-3',
-            court: 'Quadra 1',
-            date: '11/07/2025',
-            time: '09:00',
-            category: 'Open Masculina',
-            group: 'Chave A',
-            status: 'completed'
-          },
-          {
-            id: 'MATCH002',
-            team1: 'Maria Costa / Ana Lima',
-            team2: 'Julia Rocha / Camila Souza',
-            score: '',
-            court: 'Quadra 2',
-            date: '11/07/2025',
-            time: '10:30',
-            category: 'Open Feminina',
-            group: 'Chave B',
-            status: 'scheduled'
-          },
-          {
-            id: 'MATCH003',
-            team1: 'Bruno Alves / Diego Santos',
-            team2: 'Lucas Ferreira / Thiago Costa',
-            score: '4-6, 6-7',
-            court: 'Quadra 3',
-            date: '12/07/2025',
-            time: '14:00',
-            category: '2ª Masculina',
-            group: 'Chave A',
-            status: 'completed'
-          }
-        ]
-        .filter(match => {
+      <div className="space-y-3">
+        {matches
+          .filter(match => {
+            const matchesDate = selectedDate === 'all' || match.date === selectedDate;
+            const matchesCourt = selectedCourt === 'all' || match.court === selectedCourt;
+            const matchesSearch = searchTerm === '' || 
+              match.team1.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              match.team2.toLowerCase().includes(searchTerm.toLowerCase());
+            return matchesDate && matchesCourt && matchesSearch;
+          })
+          .map(match => (
+            <div key={match.id} className="bg-white rounded-xl shadow-lg border border-gray-100 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-sm font-semibold">
+                    {match.id}
+                  </div>
+                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    match.status === 'completed' 
+                      ? 'bg-accent-100 text-accent-700' 
+                      : 'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {match.status === 'completed' ? 'Finalizado' : 'Agendado'}
+                  </div>
+                </div>
+                {isCreator && (
+                  <button
+                    onClick={() => handleEditMatch(match)}
+                    className="p-2 text-dark-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                  >
+                    <Edit2 size={16} />
+                  </button>
+                )}
+              </div>
+              
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex-1 text-center">
+                  <div className="font-bold text-dark-900">
+                    {match.team1}
+                  </div>
+                </div>
+                <div className="mx-6">
+                  {match.status === 'completed' ? (
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-dark-900">{match.score}</div>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-primary-600">vs</div>
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 text-center">
+                  <div className="font-bold text-dark-900">
+                    {match.team2}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-sm text-dark-600">
+                <div className="flex items-center">
+                  <span className="font-medium mr-2">{match.court}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="font-medium mr-2">{match.date}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="font-medium mr-2">{match.time}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="font-medium mr-2">{match.category}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="font-medium mr-2">{match.group}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        
+        {/* Empty state if no matches found */}
+        {matches.filter(match => {
           const matchesDate = selectedDate === 'all' || match.date === selectedDate;
           const matchesCourt = selectedCourt === 'all' || match.court === selectedCourt;
           const matchesSearch = searchTerm === '' || 
             match.team1.toLowerCase().includes(searchTerm.toLowerCase()) ||
             match.team2.toLowerCase().includes(searchTerm.toLowerCase());
           return matchesDate && matchesCourt && matchesSearch;
-        })
-        .map(match => (
-          <div key={match.id} className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-4">
-                <div className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-sm font-semibold">
-                  {match.id}
-                </div>
-                <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  match.status === 'completed' 
-                    ? 'bg-accent-100 text-accent-700' 
-                    : 'bg-yellow-100 text-yellow-700'
-                }`}>
-                  {match.status === 'completed' ? 'Finalizado' : 'Agendado'}
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex-1 text-center">
-                <div className="font-bold text-dark-900 mb-1">
-                  {match.team1.split(' / ')[0]} / {match.team1.split(' / ')[1]}
-                </div>
-              </div>
-              <div className="mx-6">
-                {match.status === 'completed' ? (
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-dark-900">{match.score}</div>
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary-600">vs</div>
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 text-center">
-                <div className="font-bold text-dark-900 mb-1">
-                  {match.team2.split(' / ')[0]} / {match.team2.split(' / ')[1]}
-                </div>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm text-dark-600">
-              <div>
-                <span className="font-medium">Quadra:</span>
-                <div className="text-dark-900">{match.court}</div>
-              </div>
-              <div>
-                <span className="font-medium">Data:</span>
-                <div className="text-dark-900">{match.date}</div>
-              </div>
-              <div>
-                <span className="font-medium">Horário:</span>
-                <div className="text-dark-900">{match.time}</div>
-              </div>
-              <div>
-                <span className="font-medium">Categoria:</span>
-                <div className="text-dark-900">{match.category}</div>
-              </div>
-              <div>
-                <span className="font-medium">Grupo:</span>
-                <div className="text-dark-900">{match.group}</div>
-              </div>
-            </div>
-          </div>
-        ))}
-        
-        {/* Empty state if no matches found */}
-        {[].length === 0 && (
+        }).length === 0 && (
           <div className="text-center py-12">
             <Play size={64} className="text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-dark-900 mb-2">Nenhum jogo encontrado</h3>
@@ -931,8 +1122,178 @@ const TournamentDetail: React.FC = () => {
     </div>
   );
 
-  const renderInfoTab = () => (
+  const renderLiveTab = () => (
     <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-dark-800">Transmissão Ao Vivo</h2>
+        <p className="text-dark-600">Assista aos jogos em tempo real</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {tournament.courts.map((court, index) => {
+          const isLive = index < 2; // Mock: first 2 courts are live
+          const currentMatch = matches.find(m => m.court === court && m.status === 'scheduled');
+          
+          return (
+            <div key={court} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+              <div className="relative">
+                <div className="bg-gradient-to-br from-primary-900 to-primary-700 h-32 flex items-center justify-center">
+                  <Video size={48} className="text-white opacity-50" />
+                </div>
+                {isLive && (
+                  <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold animate-pulse">
+                    AO VIVO
+                  </div>
+                )}
+              </div>
+              
+              <div className="p-4">
+                <h3 className="text-lg font-bold text-dark-800 mb-2">{court}</h3>
+                
+                {currentMatch ? (
+                  <div className="mb-4">
+                    <div className="text-sm text-dark-600 mb-1">Agora:</div>
+                    <div className="font-semibold text-dark-900 text-sm">
+                      {currentMatch.team1} vs {currentMatch.team2}
+                    </div>
+                    <div className="text-xs text-dark-500">
+                      {currentMatch.category} • {currentMatch.time}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mb-4">
+                    <div className="text-sm text-dark-500">Próximo jogo em breve</div>
+                  </div>
+                )}
+                
+                <button 
+                  className={`w-full py-3 rounded-lg font-semibold transition-all flex items-center justify-center ${
+                    isLive 
+                      ? 'bg-red-500 text-white hover:bg-red-600' 
+                      : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  }`}
+                  disabled={!isLive}
+                >
+                  <Play size={18} className="mr-2" />
+                  {isLive ? 'Assistir Ao Vivo' : 'Transmissão Indisponível'}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const renderResultsTab = () => {
+    // Mock results data
+    const results = [
+      {
+        category: 'Open Masculina',
+        champion: { team: 'João Silva / Pedro Santos', score: '6-4, 6-3' },
+        runnerUp: { team: 'Carlos Lima / Rafael Dias', score: '4-6, 3-6' }
+      },
+      {
+        category: 'Open Feminina',
+        champion: { team: 'Maria Costa / Ana Lima', score: '6-2, 6-1' },
+        runnerUp: { team: 'Julia Rocha / Camila Souza', score: '2-6, 1-6' }
+      },
+      {
+        category: '2ª Masculina',
+        champion: { team: 'Bruno Alves / Diego Santos', score: '7-5, 6-4' },
+        runnerUp: { team: 'Lucas Ferreira / Thiago Costa', score: '5-7, 4-6' }
+      }
+    ];
+
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-dark-800">Resultados</h2>
+            <p className="text-dark-600">Campeões e vice-campeões por categoria</p>
+          </div>
+          
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400" size={18} />
+            <input
+              type="text"
+              placeholder="Buscar por nome do atleta..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {results
+            .filter(result => 
+              searchTerm === '' ||
+              result.champion.team.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              result.runnerUp.team.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+            .map((result, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-primary-900 to-primary-700 text-white px-6 py-4">
+                  <h3 className="text-lg font-bold">{result.category}</h3>
+                </div>
+                
+                <div className="p-6 space-y-6">
+                  {/* Champion */}
+                  <div className="text-center">
+                    <div className="flex items-center justify-center mb-3">
+                      <Crown size={32} className="text-yellow-500 mr-2" />
+                      <span className="text-lg font-bold text-yellow-600">CAMPEÃO</span>
+                    </div>
+                    <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
+                      <h4 className="text-xl font-bold text-dark-900 mb-2">
+                        {result.champion.team}
+                      </h4>
+                      <div className="text-lg font-semibold text-yellow-700">
+                        Final: {result.champion.score}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Runner-up */}
+                  <div className="text-center">
+                    <div className="flex items-center justify-center mb-3">
+                      <Medal size={24} className="text-gray-400 mr-2" />
+                      <span className="text-md font-semibold text-gray-600">VICE-CAMPEÃO</span>
+                    </div>
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                      <h4 className="text-lg font-semibold text-dark-800 mb-1">
+                        {result.runnerUp.team}
+                      </h4>
+                      <div className="text-sm text-gray-600">
+                        Final: {result.runnerUp.score}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+        </div>
+
+        {results.filter(result => 
+          searchTerm === '' ||
+          result.champion.team.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          result.runnerUp.team.toLowerCase().includes(searchTerm.toLowerCase())
+        ).length === 0 && (
+          <div className="text-center py-12">
+            <Award size={64} className="text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-dark-900 mb-2">Nenhum resultado encontrado</h3>
+            <p className="text-dark-500">
+              Tente ajustar o termo de busca.
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderInfoTab = () => (
+    <div className="space-y-4">
       {/* Sub-navigation */}
       <div className="border-b border-gray-200">
         <nav className="flex space-x-8">
@@ -959,7 +1320,7 @@ const TournamentDetail: React.FC = () => {
       </div>
 
       {activeSubTab === 'geral' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
             <div className="flex items-center mb-4">
               <Calendar className="text-primary-600 mr-3" size={24} />
@@ -1065,16 +1426,15 @@ const TournamentDetail: React.FC = () => {
       
       <div className="pt-16">
         {/* Hero Section */}
-        <div className="bg-gradient-to-br from-primary-900 via-primary-800 to-dark-900 py-12">
+        <div className="bg-gradient-to-br from-primary-900 via-primary-800 to-dark-900 py-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               <div className="flex-1">
-                <h1 className="text-4xl md:text-5xl font-black text-white mb-4">
+                <h1 className="text-4xl md:text-5xl font-black text-white mb-3">
                   {tournament.name}
                 </h1>
-                <div className="flex flex-wrap items-center gap-6 text-white">
+                <div className="flex flex-wrap items-center gap-4 text-white">
                   <div className="flex items-center">
-                    <div className="w-2 h-2 bg-accent-500 rounded-full mr-3"></div>
                     <span className="font-medium">{tournament.club}</span>
                   </div>
                   <div className="flex items-center">
@@ -1088,20 +1448,20 @@ const TournamentDetail: React.FC = () => {
                 </div>
               </div>
               
-              <div className="mt-6 lg:mt-0">
+              <div className="mt-4 lg:mt-0">
                 {isCreator ? (
-                  <button className="bg-accent-500 text-dark-900 px-6 py-3 rounded-lg font-semibold hover:bg-accent-400 transition-all duration-300 shadow-lg flex items-center">
-                    <Edit2 size={20} className="mr-2" />
+                  <button className="bg-accent-500 text-dark-900 px-4 py-2 rounded-lg font-semibold hover:bg-accent-400 transition-all duration-300 shadow-lg flex items-center">
+                    <Edit2 size={18} className="mr-2" />
                     Editar
                   </button>
                 ) : isAthlete ? (
-                  <button className="bg-accent-500 text-dark-900 px-6 py-3 rounded-lg font-semibold hover:bg-accent-400 transition-all duration-300 shadow-lg flex items-center">
-                    <Zap size={20} className="mr-2" />
+                  <button className="bg-accent-500 text-dark-900 px-4 py-2 rounded-lg font-semibold hover:bg-accent-400 transition-all duration-300 shadow-lg flex items-center">
+                    <Zap size={18} className="mr-2" />
                     Inscrever-se
                   </button>
                 ) : !user ? (
-                  <button className="bg-accent-500 text-dark-900 px-6 py-3 rounded-lg font-semibold hover:bg-accent-400 transition-all duration-300 shadow-lg flex items-center">
-                    <Zap size={20} className="mr-2" />
+                  <button className="bg-accent-500 text-dark-900 px-4 py-2 rounded-lg font-semibold hover:bg-accent-400 transition-all duration-300 shadow-lg flex items-center">
+                    <Zap size={18} className="mr-2" />
                     Inscrever-se
                   </button>
                 ) : null}
@@ -1120,7 +1480,7 @@ const TournamentDetail: React.FC = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
+                    className={`flex items-center py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                       activeTab === tab.id
                         ? 'border-primary-600 text-primary-600'
                         : 'border-transparent text-dark-500 hover:text-dark-700 hover:border-gray-300'
@@ -1136,25 +1496,13 @@ const TournamentDetail: React.FC = () => {
         </div>
 
         {/* Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {activeTab === 'info' && renderInfoTab()}
           {activeTab === 'inscritos' && renderParticipantsTab()}
           {activeTab === 'grupos' && renderGroupsTab()}
           {activeTab === 'jogos' && renderMatchesTab()}
-          {activeTab === 'ao-vivo' && (
-            <div className="text-center py-12">
-              <Zap size={64} className="text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-dark-900 mb-2">Transmissão ao vivo</h3>
-              <p className="text-dark-500">A transmissão será disponibilizada durante o torneio.</p>
-            </div>
-          )}
-          {activeTab === 'resultados' && (
-            <div className="text-center py-12">
-              <Award size={64} className="text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-dark-900 mb-2">Resultados</h3>
-              <p className="text-dark-500">Os resultados serão exibidos após o término das partidas.</p>
-            </div>
-          )}
+          {activeTab === 'ao-vivo' && renderLiveTab()}
+          {activeTab === 'resultados' && renderResultsTab()}
         </div>
       </div>
 
@@ -1163,6 +1511,13 @@ const TournamentDetail: React.FC = () => {
         onClose={() => setShowAIModal(false)}
         categories={tournament.categories}
         onConfirm={generateAIParticipants}
+      />
+
+      <ScoreModal
+        isOpen={showScoreModal}
+        onClose={() => setShowScoreModal(false)}
+        match={selectedMatch}
+        onSave={handleSaveScore}
       />
     </div>
   );
