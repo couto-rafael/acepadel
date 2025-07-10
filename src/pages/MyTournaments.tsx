@@ -234,13 +234,17 @@ const MyTournaments: React.FC = () => {
                           <div
                             className="bg-accent-600 h-2 rounded-full"
                             style={{ 
-                              width: `${Math.min((tournament.participantsCount / tournament.maxParticipants) * 100, 100)}%` 
+                              width: tournament.hasParticipantLimit && tournament.maxParticipants 
+                                ? `${Math.min((tournament.participantsCount / tournament.maxParticipants) * 100, 100)}%`
+                                : '0%'
                             }}
                           ></div>
                         </div>
-                        <p className="text-xs text-dark-500 mt-1">
-                          {Math.round((tournament.participantsCount / tournament.maxParticipants) * 100)}% ocupado
-                        </p>
+                        {tournament.hasParticipantLimit && tournament.maxParticipants && (
+                          <p className="text-xs text-dark-500 mt-1">
+                            {Math.round((tournament.participantsCount / tournament.maxParticipants) * 100)}% ocupado
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>

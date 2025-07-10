@@ -10,6 +10,11 @@ interface TournamentCardProps {
 
 const TournamentCard: React.FC<TournamentCardProps> = ({ tournament }) => {
   const { id, name, club, location, date, status, participantsCount } = tournament;
+  
+  // Get tournament data from localStorage to check if it has participant limit
+  const clubTournaments = JSON.parse(localStorage.getItem('clubTournaments') || '[]');
+  const tournamentData = clubTournaments.find((t: any) => t.id === id);
+  const hasParticipantLimit = tournamentData?.hasParticipantLimit && tournamentData?.maxParticipants;
 
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { 
@@ -51,7 +56,11 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ tournament }) => {
         
         <div className="flex items-center text-dark-600">
           <Users size={18} className="mr-2 text-primary-600" />
-          <span>{participantsCount} inscritos</span>
+          <span>
+            {participantsCount} 
+            {hasParticipantLimit ? ` / ${tournamentData.maxParticipants}` : ''} 
+            inscritos
+          </span>
         </div>
       </div>
       
@@ -91,6 +100,22 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ tournament }) => {
             Inscrever-se
           </button>
         </div>
+        
+        {/* Progress bar - only show if tournament has participant limit */}
+        {hasParticipantLimit && (
+          <div className="mt-3">
+            <div className="flex justify-between text-xs text-dark-500 mb-1">
+              <span>Ocupação</span>
+              <span>{Math.round((participantsCount / tournamentData.maxParticipants) * 100)}% ocupado</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-accent-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${Math.min((participantsCount / tournamentData.maxParticipants) * 100, 100)}%` }}
+              ></div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -167,12 +167,15 @@ const TournamentDetail: React.FC = () => {
     registrationFee: 120.00,
     description: 'Torneio aberto para todas as categorias',
     categories: ['Open Masculina', 'Open Feminina', '2ª Masc', '2ª Fem', '3ª Masc', '3ª Fem', '4ª Masc', '4ª Fem', '5ª Masc', '5ª Fem', '6ª Masc', '6ª Fem', '7ª Masc', '7ª Fem', 'Mista A', 'Mista B', 'Mista C', 'Mista D'],
-    maxParticipants: 64,
-    hasParticipantLimit: true,
     courts: ['Quadra 1', 'Quadra 2', 'Quadra 3', 'Quadra 4'],
     dates: ['11/07/2025', '12/07/2025', '13/07/2025'],
     createdBy: 'clube@teste.com' // Mock club email
   };
+
+  // Get real tournament data from localStorage
+  const clubTournaments = JSON.parse(localStorage.getItem('clubTournaments') || '[]');
+  const realTournamentData = clubTournaments.find((t: any) => t.id === id);
+  const hasParticipantLimit = realTournamentData?.hasParticipantLimit && realTournamentData?.maxParticipants;
 
   // Check if current user is the tournament creator
   const isCreator = user && profile?.user_type === 'club' && profile.email === tournament.createdBy;
@@ -990,23 +993,23 @@ const TournamentDetail: React.FC = () => {
                   R$ {tournament.registrationFee.toFixed(2)}
                 </span>
               </div>
-              {tournament.hasParticipantLimit && tournament.maxParticipants && (
+              {hasParticipantLimit && (
                 <>
                   <div className="flex justify-between">
                     <span className="text-dark-600">Vagas:</span>
-                    <span className="font-semibold text-dark-900">{tournament.maxParticipants}</span>
+                    <span className="font-semibold text-dark-900">{realTournamentData.maxParticipants}</span>
                   </div>
                   <div className="mt-4">
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-dark-600">Ocupação</span>
                       <span className="text-dark-600">
-                        {Math.round((participants.length / tournament.maxParticipants) * 100)}% ocupado
+                        {Math.round((participants.length / realTournamentData.maxParticipants) * 100)}% ocupado
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-accent-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${Math.min((participants.length / tournament.maxParticipants) * 100, 100)}%` }}
+                        style={{ width: `${Math.min((participants.length / realTournamentData.maxParticipants) * 100, 100)}%` }}
                       ></div>
                     </div>
                   </div>
