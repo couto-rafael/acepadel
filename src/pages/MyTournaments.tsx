@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import DashboardHeader from '../components/DashboardHeader';
 import { Plus, Calendar, Users, Trophy, Edit2, Trash2, Eye } from 'lucide-react';
 
@@ -66,6 +66,23 @@ const MyTournaments: React.FC = () => {
         return 'Agendado';
       default:
         return 'Desconhecido';
+    }
+  };
+
+  const handleEditTournament = (tournamentId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Navigate to edit tournament page
+    navigate(`/edit-tournament/${tournamentId}`);
+  };
+
+  const handleDeleteTournament = (tournamentId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (confirm('Tem certeza que deseja excluir este torneio?')) {
+      const updatedTournaments = tournaments.filter(t => t.id !== tournamentId);
+      setTournaments(updatedTournaments);
+      localStorage.setItem('clubTournaments', JSON.stringify(updatedTournaments));
     }
   };
 
@@ -191,19 +208,23 @@ const MyTournaments: React.FC = () => {
                       <div className="flex space-x-2">
                         <button 
                           className="p-2 text-dark-600 hover:text-primary-600 hover:bg-primary-50 rounded"
-                          onClick={(e) => e.preventDefault()}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            navigate(`/tournament/${tournament.id}`);
+                          }}
                         >
                           <Eye size={16} />
                         </button>
                         <button 
                           className="p-2 text-dark-600 hover:text-accent-600 hover:bg-accent-50 rounded"
-                          onClick={(e) => e.preventDefault()}
+                          onClick={(e) => handleEditTournament(tournament.id, e)}
                         >
                           <Edit2 size={16} />
                         </button>
                         <button 
                           className="p-2 text-dark-600 hover:text-red-600 hover:bg-red-50 rounded"
-                          onClick={(e) => e.preventDefault()}
+                          onClick={(e) => handleDeleteTournament(tournament.id, e)}
                         >
                           <Trash2 size={16} />
                         </button>

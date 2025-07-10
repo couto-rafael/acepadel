@@ -14,6 +14,11 @@ const Navbar: React.FC = () => {
   
   const isActive = (path: string) => location.pathname === path;
 
+  // If user is logged in, don't show this navbar - use DashboardHeader instead
+  if (user) {
+    return null;
+  }
+
   const handleLogout = async () => {
     await signOut();
     navigate('/');

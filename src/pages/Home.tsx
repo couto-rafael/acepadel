@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
+import DashboardHeader from '../components/DashboardHeader';
 import Hero from '../components/Hero';
 import Filters from '../components/Filters';
 import TournamentList from '../components/TournamentList';
 import { LocationFilter } from '../types';
 import { Zap, Trophy, Users, TrendingUp } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Home: React.FC = () => {
+  const { user } = useAuth();
   const [filters, setFilters] = useState<LocationFilter>({
     state: '',
     city: '',
@@ -27,7 +30,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-light">
-      <Navbar />
+      {user ? <DashboardHeader /> : <Navbar />}
       <Hero onSearchClick={scrollToTournaments} />
       
       <div id="tournaments-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">

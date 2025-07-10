@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
+import DashboardHeader from '../components/DashboardHeader';
 import Filters from '../components/Filters';
 import TournamentList from '../components/TournamentList';
 import { LocationFilter } from '../types';
 import { Zap } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Tournaments: React.FC = () => {
+  const { user } = useAuth();
   const [filters, setFilters] = useState<LocationFilter>({
     state: '',
     city: '',
@@ -19,7 +22,7 @@ const Tournaments: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-light">
-      <Navbar />
+      {user ? <DashboardHeader /> : <Navbar />}
       
       <div className="pt-16">
         <div className="bg-gradient-to-br from-primary-900 via-primary-800 to-dark-900 py-16">

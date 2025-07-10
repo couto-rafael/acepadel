@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
+import DashboardHeader from '../components/DashboardHeader';
 import { Mail, Phone, MapPin, Send, MessageSquare, Clock, Zap } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Contact: React.FC = () => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -24,7 +27,7 @@ const Contact: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-light">
-      <Navbar />
+      {user ? <DashboardHeader /> : <Navbar />}
       
       <div className="pt-16">
         <div className="bg-gradient-to-br from-primary-900 via-primary-800 to-dark-900 py-16">

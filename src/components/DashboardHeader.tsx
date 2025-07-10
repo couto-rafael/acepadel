@@ -268,7 +268,7 @@ const DashboardHeader: React.FC = () => {
               </button>
               
               {isNotificationsOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl py-1 z-50 border border-gray-100 animate-fade-in">
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl py-1 z-50 border border-gray-100 animate-fade-in" style={{ top: '100%' }}>
                   <div className="px-4 py-3 border-b border-gray-200">
                     <div className="flex justify-between items-center">
                       <h3 className="text-lg font-bold text-dark-800">Notificações</h3>
@@ -308,7 +308,14 @@ const DashboardHeader: React.FC = () => {
                     ))}
                   </div>
                   <div className="px-4 py-2 border-t border-gray-200">
-                    <button className="text-sm text-primary-600 hover:text-primary-700 w-full text-center font-medium">
+                    <button 
+                      onClick={() => {
+                        setIsNotificationsOpen(false);
+                        // Navigate to notifications page or expand view
+                        console.log('Ver todas as notificações');
+                      }}
+                      className="text-sm text-primary-600 hover:text-primary-700 w-full text-center font-medium"
+                    >
                       Ver todas as notificações
                     </button>
                   </div>

@@ -55,7 +55,7 @@ const ClubDashboard: React.FC = () => {
       value: scheduledTournaments,
       icon: Trophy,
       color: 'bg-accent-500',
-      action: 'Criar novo torneio',
+      action: 'Criar Novo Torneio',
       actionIcon: ArrowRight,
       actionLink: '/create-tournament'
     },

@@ -1071,9 +1071,7 @@ const TournamentDetail: React.FC = () => {
                 </h1>
                 <div className="flex flex-wrap items-center gap-6 text-white">
                   <div className="flex items-center">
-                    <div className="w-6 h-6 bg-accent-500 rounded mr-3 flex items-center justify-center">
-                      <div className="w-3 h-3 bg-dark-900 rounded"></div>
-                    </div>
+                    <div className="w-2 h-2 bg-accent-500 rounded-full mr-3"></div>
                     <span className="font-medium">{tournament.club}</span>
                   </div>
                   <div className="flex items-center">
@@ -1089,12 +1087,17 @@ const TournamentDetail: React.FC = () => {
               
               <div className="mt-6 lg:mt-0">
                 {isCreator ? (
-                  <button className="bg-accent-500 text-dark-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent-400 transition-all duration-300 shadow-xl flex items-center">
+                  <button className="bg-accent-500 text-dark-900 px-6 py-3 rounded-lg font-semibold hover:bg-accent-400 transition-all duration-300 shadow-lg flex items-center">
                     <Edit2 size={20} className="mr-2" />
                     Editar
                   </button>
                 ) : isAthlete ? (
-                  <button className="bg-accent-500 text-dark-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-accent-400 transition-all duration-300 shadow-xl flex items-center">
+                  <button className="bg-accent-500 text-dark-900 px-6 py-3 rounded-lg font-semibold hover:bg-accent-400 transition-all duration-300 shadow-lg flex items-center">
+                    <Zap size={20} className="mr-2" />
+                    Inscrever-se
+                  </button>
+                ) : !user ? (
+                  <button className="bg-accent-500 text-dark-900 px-6 py-3 rounded-lg font-semibold hover:bg-accent-400 transition-all duration-300 shadow-lg flex items-center">
                     <Zap size={20} className="mr-2" />
                     Inscrever-se
                   </button>
