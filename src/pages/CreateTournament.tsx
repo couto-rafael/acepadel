@@ -62,7 +62,7 @@ const CreateTournament: React.FC = () => {
     profileImage: null,
     bannerImage: null,
     sponsors: [],
-    streamingLinks: []
+    streamingLinks: [],
     hasParticipantLimit: false
   });
 
