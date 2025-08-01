@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import DashboardHeader from '../components/DashboardHeader';
-import { Plus, Calendar, Users, Trophy, Edit2, Trash2, Eye } from 'lucide-react';
+import { Plus, Calendar, Users, Trophy, Edit2, Trash2, Eye, Search, Filter } from 'lucide-react';
 
 interface Tournament {
   id: string;
@@ -19,6 +19,8 @@ interface Tournament {
 const MyTournaments: React.FC = () => {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [filter, setFilter] = useState<'all' | 'open' | 'in-progress' | 'completed' | 'scheduled'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,9 +37,15 @@ const MyTournaments: React.FC = () => {
     }
   }, []);
 
-  const filteredTournaments = tournaments.filter(tournament => 
-    filter === 'all' || tournament.status === filter
-  );
+  const filteredTournaments = tournaments.filter(tournament => {
+    const matchesStatus = filter === 'all' || tournament.status === filter;
+    const matchesSearch = searchTerm === '' || 
+      tournament.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDate = dateFilter === '' || 
+      tournament.startDate.includes(dateFilter);
+    
+    return matchesStatus && matchesSearch && matchesDate;
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -106,7 +114,44 @@ const MyTournaments: React.FC = () => {
         </div>
 
         {/* Filter Tabs */}
-        <div className="bg-white rounded-xl shadow-lg mb-6 border border-gray-100">
+        <div className="bg-white rounded-xl shadow-lg mb-6 border border-gray-100 overflow-hidden">
+          {/* Search and Filters */}
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Buscar por nome do torneio..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+              <div className="md:w-48">
+                <input
+                  type="date"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Filtrar por data"
+                />
+              </div>
+              {(searchTerm || dateFilter) && (
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setDateFilter('');
+                  }}
+                  className="px-4 py-3 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Limpar
+                </button>
+              )}
+            </div>
+          </div>
+          
+          {/* Status Tabs */}
           <div className="border-b border-gray-200">
             <nav className="flex space-x-8 px-6">
               {[
@@ -137,14 +182,20 @@ const MyTournaments: React.FC = () => {
           <div className="bg-white rounded-xl shadow-lg p-12 text-center border border-gray-100">
             <Trophy className="mx-auto text-gray-300 mb-4" size={64} />
             <h3 className="text-lg font-medium text-dark-900 mb-2">
-              {filter === 'all' ? 'Nenhum torneio criado' : `Nenhum torneio ${getStatusText(filter).toLowerCase()}`}
+              {searchTerm || dateFilter 
+                ? 'Nenhum torneio encontrado' 
+                : filter === 'all' 
+                  ? 'Nenhum torneio criado' 
+                  : `Nenhum torneio ${getStatusText(filter).toLowerCase()}`}
             </h3>
             <p className="text-dark-500 mb-6">
-              {filter === 'all' 
-                ? 'Comece criando seu primeiro torneio.' 
-                : `Você não tem torneios ${getStatusText(filter).toLowerCase()}.`}
+              {searchTerm || dateFilter
+                ? 'Tente ajustar os filtros de busca.'
+                : filter === 'all' 
+                  ? 'Comece criando seu primeiro torneio.' 
+                  : `Você não tem torneios ${getStatusText(filter).toLowerCase()}.`}
             </p>
-            {filter === 'all' && (
+            {filter === 'all' && !searchTerm && !dateFilter && (
               <Link
                 to="/create-tournament"
                 className="inline-flex items-center bg-gradient-to-r from-primary-900 to-primary-700 text-white px-6 py-3 rounded-lg hover:from-primary-800 hover:to-primary-600 transition-all duration-300 shadow-lg"
@@ -208,6 +259,7 @@ const MyTournaments: React.FC = () => {
                       <div className="flex space-x-2">
                         <button 
                           className="p-2 text-dark-600 hover:text-primary-600 hover:bg-primary-50 rounded"
+                          title="Visualizar torneio"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -219,12 +271,14 @@ const MyTournaments: React.FC = () => {
                         <button 
                           className="p-2 text-dark-600 hover:text-accent-600 hover:bg-accent-50 rounded"
                           onClick={(e) => handleEditTournament(tournament.id, e)}
+                          title="Editar torneio"
                         >
                           <Edit2 size={16} />
                         </button>
                         <button 
                           className="p-2 text-dark-600 hover:text-red-600 hover:bg-red-50 rounded"
                           onClick={(e) => handleDeleteTournament(tournament.id, e)}
+                          title="Deletar torneio"
                         >
                           <Trash2 size={16} />
                         </button>

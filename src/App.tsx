@@ -11,6 +11,7 @@ import ClubDashboard from './pages/ClubDashboard';
 import ClubProfile from './pages/ClubProfile';
 import CreateTournament from './pages/CreateTournament';
 import MyTournaments from './pages/MyTournaments';
+import ClubReports from './pages/ClubReports';
 import MeuCadastro from './pages/MeuCadastro';
 import Settings from './pages/Settings';
 import Marketplace from './pages/Marketplace';
@@ -137,6 +138,14 @@ function AppContent() {
         element={
           <ProtectedRoute allowedUserTypes={['club']}>
             <MyTournaments />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/club-reports" 
+        element={
+          <ProtectedRoute allowedUserTypes={['club']}>
+            <ClubReports />
           </ProtectedRoute>
         } 
       />
