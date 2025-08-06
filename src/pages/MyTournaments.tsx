@@ -256,7 +256,7 @@ const MyTournaments: React.FC = () => {
                     </div>
 
                     <div className="flex justify-between items-center">
-                      <div className="flex space-x-2">
+                      <div className="flex space-x-1">
                         <button 
                           className="p-2 text-dark-600 hover:text-primary-600 hover:bg-primary-50 rounded"
                           title="Visualizar torneio"
