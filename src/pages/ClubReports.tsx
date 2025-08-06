@@ -1,3 +1,16 @@
+/*
+  # Página de Relatórios do Clube
+  
+  Esta página permite que clubes visualizem, analisem e exportem dados dos seus torneios.
+  
+  ## Funcionalidades:
+  1. Filtros por torneio e data
+  2. Tabela completa com dados dos torneios
+  3. Gráficos de inscritos por categoria e crescimento
+  4. Exportação CSV/PDF
+  5. Relatório completo por torneio
+*/
+
 import React, { useState, useEffect } from 'react';
 import DashboardHeader from '../components/DashboardHeader';
 import { 
@@ -22,9 +35,11 @@ interface TournamentReport {
   teams: number;
   totalGames: number;
   completedGames: number;
+  gamesWithScore: number;
   startDate: string;
   endDate: string;
   status: string;
+  type: 'regular' | 'super8';
 }
 
 const ClubReports: React.FC = () => {
@@ -47,9 +62,11 @@ const ClubReports: React.FC = () => {
       teams: Math.floor((tournament.participantsCount || 0) / 2),
       totalGames: (tournament.categories?.length || 0) * 6, // Estimativa
       completedGames: Math.floor(((tournament.categories?.length || 0) * 6) * 0.7), // 70% completed
+      gamesWithScore: Math.floor(((tournament.categories?.length || 0) * 6) * 0.6), // 60% with score
       startDate: tournament.startDate,
       endDate: tournament.endDate,
-      status: tournament.status
+      status: tournament.status,
+      type: tournament.tournamentType || 'regular'
     }));
     
     setTournaments(reportsData);
@@ -88,10 +105,12 @@ const ClubReports: React.FC = () => {
     participants: filteredTournaments.reduce((sum, t) => sum + t.participants, 0),
     teams: filteredTournaments.reduce((sum, t) => sum + t.teams, 0),
     games: filteredTournaments.reduce((sum, t) => sum + t.totalGames, 0),
-    completedGames: filteredTournaments.reduce((sum, t) => sum + t.completedGames, 0)
+    completedGames: filteredTournaments.reduce((sum, t) => sum + t.completedGames, 0),
+    gamesWithScore: filteredTournaments.reduce((sum, t) => sum + t.gamesWithScore, 0)
   };
 
   const completionRate = totalStats.games > 0 ? Math.round((totalStats.completedGames / totalStats.games) * 100) : 0;
+  const scoreRate = totalStats.games > 0 ? Math.round((totalStats.gamesWithScore / totalStats.games) * 100) : 0;
 
   // Mock data for charts
   const categoryData = [
@@ -113,14 +132,16 @@ const ClubReports: React.FC = () => {
 
   const handleExportCSV = () => {
     const csvContent = [
-      ['Nome do Torneio', 'Categorias', 'Participantes', 'Duplas', 'Jogos Totais', 'Jogos Realizados', 'Data Início', 'Status'],
+      ['Nome do Torneio', 'Tipo', 'Categorias', 'Participantes', 'Duplas', 'Jogos Totais', 'Jogos Realizados', 'Jogos com Placar', 'Data Início', 'Status'],
       ...filteredTournaments.map(t => [
         t.name,
+        t.type === 'super8' ? 'Super 8' : 'Regular',
         t.categories.join('; '),
         t.participants,
         t.teams,
         t.totalGames,
         t.completedGames,
+        t.gamesWithScore,
         new Date(t.startDate).toLocaleDateString('pt-BR'),
         t.status
       ])
@@ -216,7 +237,7 @@ const ClubReports: React.FC = () => {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
             <div className="flex items-center justify-between mb-2">
               <Trophy className="text-primary-600" size={24} />
@@ -255,6 +276,14 @@ const ClubReports: React.FC = () => {
               <span className="text-2xl font-bold text-dark-900">{completionRate}%</span>
             </div>
             <p className="text-sm text-dark-600">Jogos Realizados</p>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <BarChart3 className="text-orange-600" size={24} />
+              <span className="text-2xl font-bold text-dark-900">{scoreRate}%</span>
+            </div>
+            <p className="text-sm text-dark-600">Jogos com Placar</p>
           </div>
         </div>
 
@@ -358,6 +387,9 @@ const ClubReports: React.FC = () => {
                     Nome do Torneio
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Tipo
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Categorias
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -368,6 +400,9 @@ const ClubReports: React.FC = () => {
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Jogos Realizados
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Jogos com Placar
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -382,6 +417,13 @@ const ClubReports: React.FC = () => {
                       <div className="text-sm text-gray-500">
                         {new Date(tournament.startDate).toLocaleDateString('pt-BR')}
                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        tournament.type === 'super8' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {tournament.type === 'super8' ? 'Super 8' : 'Regular'}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">{tournament.categories.length} categorias</div>
@@ -405,6 +447,19 @@ const ClubReports: React.FC = () => {
                           className="bg-accent-600 h-2 rounded-full"
                           style={{ 
                             width: `${tournament.totalGames > 0 ? (tournament.completedGames / tournament.totalGames) * 100 : 0}%` 
+                          }}
+                        />
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {tournament.gamesWithScore}/{tournament.totalGames}
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                        <div
+                          className="bg-primary-600 h-2 rounded-full"
+                          style={{ 
+                            width: `${tournament.totalGames > 0 ? (tournament.gamesWithScore / tournament.totalGames) * 100 : 0}%` 
                           }}
                         />
                       </div>

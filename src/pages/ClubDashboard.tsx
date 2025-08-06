@@ -159,6 +159,44 @@ const ClubDashboard: React.FC = () => {
           <p className="text-dark-600">Aqui está um resumo das suas atividades recentes</p>
         </div>
 
+        {/* Quick Actions - Moved above KPIs */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-8">
+          <h2 className="text-xl font-bold text-dark-900 mb-4">Ações Rápidas</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link
+              to="/create-tournament"
+              className="flex items-center justify-center p-4 bg-gradient-to-r from-primary-900 to-primary-700 text-white rounded-lg hover:from-primary-800 hover:to-primary-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            >
+              <Plus className="mr-2" size={18} />
+              <span className="font-semibold">Criar Torneio</span>
+            </Link>
+            
+            <Link
+              to="/my-tournaments"
+              className="flex items-center justify-center p-4 bg-gradient-to-r from-accent-500 to-accent-400 text-dark-900 rounded-lg hover:from-accent-400 hover:to-accent-300 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            >
+              <Trophy className="mr-2" size={18} />
+              <span className="font-semibold">Ver Torneios</span>
+            </Link>
+            
+            <Link
+              to="/club-reports"
+              className="flex items-center justify-center p-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg hover:from-blue-500 hover:to-blue-400 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            >
+              <BarChart3 className="mr-2" size={18} />
+              <span className="font-semibold">Relatórios</span>
+            </Link>
+            
+            <Link
+              to="/club-profile"
+              className="flex items-center justify-center p-4 bg-gradient-to-r from-gray-600 to-gray-500 text-white rounded-lg hover:from-gray-500 hover:to-gray-400 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            >
+              <FileText className="mr-2" size={18} />
+              <span className="font-semibold">Meu Perfil</span>
+            </Link>
+          </div>
+        </div>
+
         {/* KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
           {kpis.map((kpi, index) => (
@@ -276,44 +314,6 @@ const ClubDashboard: React.FC = () => {
                 })}
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-          <h2 className="text-xl font-bold text-dark-900 mb-6">Ações Rápidas</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Link
-              to="/create-tournament"
-              className="flex items-center justify-center p-6 bg-gradient-to-r from-primary-900 to-primary-700 text-white rounded-lg hover:from-primary-800 hover:to-primary-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            >
-              <Plus className="mr-3" size={20} />
-              <span className="font-semibold">Criar Torneio</span>
-            </Link>
-            
-            <Link
-              to="/my-tournaments"
-              className="flex items-center justify-center p-6 bg-gradient-to-r from-accent-500 to-accent-400 text-dark-900 rounded-lg hover:from-accent-400 hover:to-accent-300 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            >
-              <Trophy className="mr-3" size={20} />
-              <span className="font-semibold">Ver Torneios</span>
-            </Link>
-            
-            <Link
-              to="/club-reports"
-              className="flex items-center justify-center p-6 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg hover:from-blue-500 hover:to-blue-400 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            >
-              <BarChart3 className="mr-3" size={20} />
-              <span className="font-semibold">Relatórios</span>
-            </Link>
-            
-            <Link
-              to="/club-profile"
-              className="flex items-center justify-center p-6 bg-gradient-to-r from-gray-600 to-gray-500 text-white rounded-lg hover:from-gray-500 hover:to-gray-400 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            >
-              <FileText className="mr-3" size={20} />
-              <span className="font-semibold">Meu Perfil</span>
-            </Link>
           </div>
         </div>
       </div>

@@ -21,6 +21,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 interface TournamentData {
   name: string;
+  tournamentType: 'regular' | 'super8';
   startDate: string;
   endDate: string;
   dailySchedules: Array<{
@@ -48,6 +49,7 @@ const CreateTournament: React.FC = () => {
   const { profile } = useAuth();
   const [tournamentData, setTournamentData] = useState<TournamentData>({
     name: '',
+    tournamentType: 'regular',
     startDate: '',
     endDate: '',
     dailySchedules: [],
@@ -272,6 +274,50 @@ const CreateTournament: React.FC = () => {
               <label className="block text-sm font-semibold text-dark-700 mb-2">
                 Nome do Torneio *
               </label>
+              <div className="flex items-center space-x-6 mb-4">
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm font-semibold text-dark-700">Tipo de Torneio:</span>
+                  <div className="flex items-center space-x-4">
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="radio"
+                        name="tournamentType"
+                        value="regular"
+                        checked={tournamentData.tournamentType === 'regular'}
+                        onChange={(e) => handleInputChange('tournamentType', e.target.value)}
+                        className="sr-only"
+                      />
+                      <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        tournamentData.tournamentType === 'regular' ? 'bg-primary-600' : 'bg-gray-300'
+                      }`}>
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          tournamentData.tournamentType === 'regular' ? 'translate-x-6' : 'translate-x-1'
+                        }`} />
+                      </div>
+                      <span className="ml-2 text-sm font-medium text-dark-700">Regular</span>
+                    </label>
+                    
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="radio"
+                        name="tournamentType"
+                        value="super8"
+                        checked={tournamentData.tournamentType === 'super8'}
+                        onChange={(e) => handleInputChange('tournamentType', e.target.value)}
+                        className="sr-only"
+                      />
+                      <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        tournamentData.tournamentType === 'super8' ? 'bg-purple-600' : 'bg-gray-300'
+                      }`}>
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          tournamentData.tournamentType === 'super8' ? 'translate-x-6' : 'translate-x-1'
+                        }`} />
+                      </div>
+                      <span className="ml-2 text-sm font-medium text-dark-700">Super 8</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
               <input
                 type="text"
                 value={tournamentData.name}
