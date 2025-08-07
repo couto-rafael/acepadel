@@ -72,14 +72,12 @@ function AppContent() {
   const location = useLocation();
 
   useEffect(() => {
-    if (!loading && user && profile) {
-      // Only redirect from home page if user is authenticated
-      if (location.pathname === '/') {
-        if (profile.user_type === 'club') {
-          navigate('/club-dashboard', { replace: true });
-        } else {
-          navigate('/dashboard', { replace: true });
-        }
+    if (!loading && user && profile && location.pathname === '/') {
+      // Always redirect authenticated users from home page to their dashboard
+      if (profile.user_type === 'club') {
+        navigate('/club-dashboard', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
       }
     }
   }, [user, profile, loading, navigate, location.pathname]);

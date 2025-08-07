@@ -9,13 +9,32 @@ import { Zap, Trophy, Users, TrendingUp } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const Home: React.FC = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [filters, setFilters] = useState<LocationFilter>({
     state: '',
     city: '',
     status: '',
     search: ''
   });
+
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-light flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
+
+  // If user is authenticated, they should be redirected by App.tsx
+  // This is a fallback in case the redirect doesn't work
+  if (user) {
+    return (
+      <div className="min-h-screen bg-light flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
   const handleFilterChange = (newFilters: LocationFilter) => {
     setFilters(newFilters);
@@ -30,7 +49,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-light">
-      {user ? <DashboardHeader /> : <Navbar />}
+      <Navbar />
       <Hero onSearchClick={scrollToTournaments} />
       
       <div id="tournaments-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
