@@ -189,15 +189,15 @@ const Settings: React.FC = () => {
     { id: 'financial', label: 'Financeiro', icon: CreditCard },
     { id: 'account', label: 'Conta', icon: UserCheck },
     { id: 'notifications', label: 'Notificações', icon: BellIcon },
-    { id: 'permissions', label: 'Permissões', icon: Shield },
-    { id: 'privacy', label: 'Privacidade', icon: Lock }
+    { id: 'privacy', label: 'Privacidade', icon: Lock },
+    { id: 'permissions', label: 'Permissões', icon: Shield }
   ] : [
     { id: 'profile', label: 'Meu Perfil', icon: UserCheck },
     { id: 'performance', label: 'Minha Performance', icon: TrendingUp },
     { id: 'achievements', label: 'Conquistas', icon: Trophy },
     { id: 'notifications', label: 'Notificações', icon: BellIcon },
-    { id: 'permissions', label: 'Permissões', icon: Shield },
     { id: 'privacy', label: 'Privacidade', icon: Lock },
+    { id: 'permissions', label: 'Permissões', icon: Shield },
     { id: 'partners', label: 'Parceiros', icon: UsersIcon }
   ];
 
@@ -1165,8 +1165,75 @@ const Settings: React.FC = () => {
           return (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-800">Notificações</h2>
-              <div className="text-center text-gray-600 py-12">
-                A ser desenvolvido
+              
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <span className="mr-2">✅</span>
+                    Desejo receber notificações:
+                  </h3>
+                  <div className="space-y-3 ml-6">
+                    <label className="flex items-center">
+                      <input type="checkbox" className="form-checkbox h-5 w-5 text-green-600 rounded mr-3" defaultChecked />
+                      <span className="text-gray-700">Por e-mail</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" className="form-checkbox h-5 w-5 text-green-600 rounded mr-3" />
+                      <span className="text-gray-700">Por WhatsApp <span className="text-sm text-gray-500">(futuro)</span></span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" className="form-checkbox h-5 w-5 text-green-600 rounded mr-3" defaultChecked />
+                      <span className="text-gray-700">Pelo app</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <span className="mr-2">🔔</span>
+                    Quero ser notificado quando:
+                  </h3>
+                  <div className="space-y-3 ml-6">
+                    <label className="flex items-center">
+                      <input type="checkbox" className="form-checkbox h-5 w-5 text-green-600 rounded mr-3" defaultChecked />
+                      <span className="text-gray-700">Uma nova dupla se inscrever</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" className="form-checkbox h-5 w-5 text-green-600 rounded mr-3" defaultChecked />
+                      <span className="text-gray-700">Uma categoria estiver cheia</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" className="form-checkbox h-5 w-5 text-green-600 rounded mr-3" />
+                      <span className="text-gray-700">Um pagamento for confirmado</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" className="form-checkbox h-5 w-5 text-green-600 rounded mr-3" />
+                      <span className="text-gray-700">Um jogo for reagendado</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" className="form-checkbox h-5 w-5 text-green-600 rounded mr-3" defaultChecked />
+                      <span className="text-gray-700">Um resultado for inserido</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <span className="mr-2">💡</span>
+                    Alertas automáticos <span className="text-sm text-gray-500">(futuro)</span>
+                  </h3>
+                  <div className="ml-6 p-4 bg-gray-50 rounded-lg">
+                    <p className="text-gray-600 text-sm">
+                      Em breve você poderá programar alertas automáticos, como "Enviar lembrete 1h antes do jogo"
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <button className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700">
+                    Salvar Preferências
+                  </button>
+                </div>
               </div>
             </div>
           );
@@ -1212,8 +1279,64 @@ const Settings: React.FC = () => {
           return (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-800">Permissões</h2>
-              <div className="text-center text-gray-600 py-12">
-                A ser desenvolvido
+              
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <span className="mr-2">✅</span>
+                    Permissões dos membros da conta:
+                  </h3>
+                  <div className="space-y-3 ml-6">
+                    <label className="flex items-center">
+                      <input type="checkbox" className="form-checkbox h-5 w-5 text-green-600 rounded mr-3" defaultChecked />
+                      <span className="text-gray-700">Pode criar ou editar torneios</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" className="form-checkbox h-5 w-5 text-green-600 rounded mr-3" />
+                      <span className="text-gray-700">Pode acessar dados financeiros</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" className="form-checkbox h-5 w-5 text-green-600 rounded mr-3" defaultChecked />
+                      <span className="text-gray-700">Pode gerenciar categorias</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" className="form-checkbox h-5 w-5 text-green-600 rounded mr-3" />
+                      <span className="text-gray-700">Pode fazer transmissões</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" className="form-checkbox h-5 w-5 text-green-600 rounded mr-3" defaultChecked />
+                      <span className="text-gray-700">Pode editar regras</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Perfis de Acesso</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-6">
+                    <div className="p-4 border border-gray-300 rounded-lg">
+                      <h4 className="font-semibold text-gray-800 mb-2">👑 Administrador</h4>
+                      <p className="text-sm text-gray-600">Acesso total a todas as funcionalidades</p>
+                    </div>
+                    <div className="p-4 border border-gray-300 rounded-lg">
+                      <h4 className="font-semibold text-gray-800 mb-2">🏆 Gestor de Torneio</h4>
+                      <p className="text-sm text-gray-600">Pode criar e gerenciar torneios</p>
+                    </div>
+                    <div className="p-4 border border-gray-300 rounded-lg">
+                      <h4 className="font-semibold text-gray-800 mb-2">💰 Financeiro</h4>
+                      <p className="text-sm text-gray-600">Acesso aos dados financeiros</p>
+                    </div>
+                    <div className="p-4 border border-gray-300 rounded-lg">
+                      <h4 className="font-semibold text-gray-800 mb-2">⚙️ Operacional</h4>
+                      <p className="text-sm text-gray-600">Gerencia jogos e resultados</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <button className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700">
+                    Salvar Permissões
+                  </button>
+                </div>
               </div>
             </div>
           );
