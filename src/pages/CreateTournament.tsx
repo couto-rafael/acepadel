@@ -272,7 +272,26 @@ const CreateTournament: React.FC = () => {
             
             <div>
               <label className="block text-sm font-semibold text-dark-700 mb-2">
-                Nome do Torneio *
+                <div className="flex items-center space-x-2">
+                  <span>Nome do Torneio *</span>
+                  <div className="relative group">
+                    <button
+                      type="button"
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+                      </svg>
+                    </button>
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-dark-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                      {tournamentData.tournamentType === 'regular' 
+                        ? 'Regular: Aberto a qualquer número de duplas. Fase de grupos e mata-mata.'
+                        : 'Super 8: Apenas 8 inscritos. Super 8 clássico, cada atleta jogando 1x com outro.'
+                      }
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-dark-800"></div>
+                    </div>
+                  </div>
+                </div>
               </label>
               <div className="flex items-center space-x-6 mb-4">
                 <div className="flex items-center space-x-4">

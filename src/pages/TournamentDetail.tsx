@@ -821,23 +821,71 @@ const TournamentDetail: React.FC = () => {
                 {/* Group matches */}
                 <div className="px-4 py-3 border-t border-gray-200">
                   <h4 className="text-sm font-semibold text-dark-800 mb-2">Jogos</h4>
-                  <div className="space-y-2">
-                    {group.matches.map(match => (
-                      <div key={match.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-xs">
-                        <div className="flex-1">
-                          <div className="font-medium text-dark-900 truncate">
-                            {match.team1.split(' / ')[0]} / {match.team1.split(' / ')[1]} vs {match.team2.split(' / ')[0]} / {match.team2.split(' / ')[1]}
+                  <div className="space-y-3">
+                    {group.matches.map((match, matchIndex) => (
+                      <div key={matchIndex} className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        {/* Mobile Layout - Stacked */}
+                        <div className="block md:hidden space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-dark-800">{match.team1}</span>
+                            {isClubOwner && (
+                              <button
+                                onClick={() => handleEditScore(match)}
+                                className="p-1 text-gray-400 hover:text-primary-600 transition-colors"
+                                title="Editar placar"
+                              >
+                                <Edit2 size={14} />
+                              </button>
+                            )}
                           </div>
-                          <div className="text-dark-500">
+                          <div className="text-center">
+                            <span className="text-primary-600 font-bold text-lg">vs</span>
+                            {match.score && (
+                              <span className="ml-2 text-lg font-bold text-dark-800">{match.score}</span>
+                            )}
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-dark-800">{match.team2}</span>
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              match.status === 'Agendado' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                            }`}>
+                              {match.status}
+                            </span>
+                          </div>
+                          <div className="text-xs text-gray-500 text-center">
                             {match.date} • {match.time} • {match.court}
                           </div>
                         </div>
-                        <div className="text-right ml-2">
-                          {match.status === 'completed' ? (
-                            <span className="font-semibold text-dark-900">{match.score}</span>
-                          ) : (
-                            <span className="text-primary-600 font-medium">Agendado</span>
-                          )}
+
+                        {/* Desktop Layout - Inline */}
+                        <div className="hidden md:flex items-center justify-between">
+                          <div className="flex items-center space-x-4 flex-1">
+                            <span className="text-sm font-medium text-dark-800 min-w-0 flex-1">{match.team1}</span>
+                            <span className="text-primary-600 font-bold">vs</span>
+                            {match.score && (
+                              <span className="text-lg font-bold text-dark-800 px-2">{match.score}</span>
+                            )}
+                            <span className="text-sm font-medium text-dark-800 min-w-0 flex-1">{match.team2}</span>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              match.status === 'Agendado' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                            }`}>
+                              {match.status}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {match.date} • {match.time} • {match.court}
+                            </span>
+                            {isClubOwner && (
+                              <button
+                                onClick={() => handleEditScore(match)}
+                                className="p-1 text-gray-400 hover:text-primary-600 transition-colors"
+                                title="Editar placar"
+                              >
+                                <Edit2 size={14} />
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1026,7 +1074,7 @@ const TournamentDetail: React.FC = () => {
       </div>
 
       {/* Matches content */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {matches
           .filter(match => {
             const matchesDate = selectedDate === 'all' || match.date === selectedDate;
@@ -1037,19 +1085,17 @@ const TournamentDetail: React.FC = () => {
             return matchesDate && matchesCourt && matchesSearch;
           })
           .map(match => (
-            <div key={match.id} className="bg-white rounded-xl shadow-lg border border-gray-100 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-3">
-                  <div className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-sm font-semibold">
-                    {match.id}
-                  </div>
-                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    match.status === 'completed' 
-                      ? 'bg-accent-100 text-accent-700' 
-                      : 'bg-yellow-100 text-yellow-700'
+            <div key={match.id} className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    match.status === 'Finalizado' ? 'bg-green-100 text-green-800' :
+                    match.status === 'Em Andamento' ? 'bg-blue-100 text-blue-800' :
+                    'bg-yellow-100 text-yellow-800'
                   }`}>
-                    {match.status === 'completed' ? 'Finalizado' : 'Agendado'}
-                  </div>
+                    {match.status}
+                  </span>
+                  <span className="text-sm text-dark-600">{match.id}</span>
                 </div>
                 {isCreator && (
                   <button
@@ -1060,47 +1106,20 @@ const TournamentDetail: React.FC = () => {
                   </button>
                 )}
               </div>
-              
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex-1 text-center">
-                  <div className="font-bold text-dark-900">
-                    {match.team1}
-                  </div>
-                </div>
-                <div className="mx-6">
-                  {match.status === 'completed' ? (
-                    <div className="text-center">
-                      <div className="text-xl font-bold text-dark-900">{match.score}</div>
-                    </div>
-                  ) : (
-                    <div className="text-center">
-                      <div className="text-xl font-bold text-primary-600">vs</div>
-                    </div>
+
+              <div className="flex items-center justify-center mb-3">
+                <span className="text-lg font-semibold text-dark-800">{match.team1}</span>
+                <div className="mx-4 flex items-center">
+                  <span className="text-primary-600 font-bold text-xl">vs</span>
+                  {match.score && (
+                    <span className="ml-2 text-xl font-bold text-dark-800">{match.score}</span>
                   )}
                 </div>
-                <div className="flex-1 text-center">
-                  <div className="font-bold text-dark-900">
-                    {match.team2}
-                  </div>
-                </div>
+                <span className="text-lg font-semibold text-dark-800">{match.team2}</span>
               </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-sm text-dark-600">
-                <div className="flex items-center">
-                  <span className="font-medium mr-2">{match.court}</span>
-                </div>
-                <div className="flex items-center">
-                  <span className="font-medium mr-2">{match.date}</span>
-                </div>
-                <div className="flex items-center">
-                  <span className="font-medium mr-2">{match.time}</span>
-                </div>
-                <div className="flex items-center">
-                  <span className="font-medium mr-2">{match.category}</span>
-                </div>
-                <div className="flex items-center">
-                  <span className="font-medium mr-2">{match.group}</span>
-                </div>
+
+              <div className="text-sm text-dark-600 text-left">
+                {match.court} • {match.date} • {match.time} • {match.category} • {match.group}
               </div>
             </div>
           ))}

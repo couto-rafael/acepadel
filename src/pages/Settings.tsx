@@ -189,15 +189,15 @@ const Settings: React.FC = () => {
     { id: 'financial', label: 'Financeiro', icon: CreditCard },
     { id: 'account', label: 'Conta', icon: UserCheck },
     { id: 'notifications', label: 'Notificações', icon: BellIcon },
-    { id: 'privacy', label: 'Privacidade', icon: Lock },
-    { id: 'permissions', label: 'Permissões', icon: Shield }
+    { id: 'permissions', label: 'Permissões', icon: Shield },
+    { id: 'privacy', label: 'Privacidade', icon: Lock }
   ] : [
     { id: 'profile', label: 'Meu Perfil', icon: UserCheck },
     { id: 'performance', label: 'Minha Performance', icon: TrendingUp },
     { id: 'achievements', label: 'Conquistas', icon: Trophy },
     { id: 'notifications', label: 'Notificações', icon: BellIcon },
-    { id: 'privacy', label: 'Privacidade', icon: Lock },
     { id: 'permissions', label: 'Permissões', icon: Shield },
+    { id: 'privacy', label: 'Privacidade', icon: Lock },
     { id: 'partners', label: 'Parceiros', icon: UsersIcon }
   ];
 
