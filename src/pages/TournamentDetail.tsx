@@ -1,292 +1,142 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import Navbar from '../components/Navbar';
 import DashboardHeader from '../components/DashboardHeader';
+import Navbar from '../components/Navbar';
 import { 
-  Calendar, 
   MapPin, 
+  Calendar, 
+  Clock, 
   Users, 
   Trophy, 
-  DollarSign, 
-  Info, 
-  Play, 
-  Award,
-  Zap,
-  Search,
-  Plus,
-  Bot,
-  Edit2,
-  Filter,
+  DollarSign,
+  Phone,
+  Mail,
+  Instagram,
+  ExternalLink,
   ChevronDown,
-  X,
+  ChevronUp,
+  Edit2,
+  Play,
   Crown,
   Medal,
-  Video
+  Award,
+  Info,
+  HelpCircle,
+  Navigation,
+  Building2,
+  Zap,
+  Star,
+  CheckCircle,
+  X
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
-interface Participant {
-  id: string;
-  name: string;
-  partner?: string;
-  category: string;
-}
-
-interface Group {
-  id: string;
-  name: string;
-  teams: {
-    name: string;
-    wins: number;
-    losses: number;
-    setsWon: number;
-    setsLost: number;
-    gamesWon: number;
-    gamesLost: number;
-    setBalance: number;
-    gameBalance: number;
-  }[];
-  matches: {
-    id: string;
-    team1: string;
-    team2: string;
-    score: string;
-    date: string;
-    time: string;
-    court: string;
-    status: 'scheduled' | 'completed';
-  }[];
-}
-
-interface Match {
-  id: string;
-  team1: string;
-  team2: string;
-  score: string;
-  court: string;
-  date: string;
-  time: string;
-  category: string;
-  group: string;
-  status: 'scheduled' | 'completed';
-}
-
-interface AIParticipantsModalProps {
+interface ScoreEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  categories: string[];
-  onConfirm: (quantity: number, category: string) => void;
+  match: any;
+  onSave: (matchId: string, team1Score: number[], team2Score: number[], winner: number) => void;
 }
 
-interface ScoreModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  match: Match | null;
-  onSave: (matchId: string, score: string) => void;
-}
+const ScoreEditModal: React.FC<ScoreEditModalProps> = ({ isOpen, onClose, match, onSave }) => {
+  const [team1Sets, setTeam1Sets] = useState<number[]>([0, 0, 0]);
+  const [team2Sets, setTeam2Sets] = useState<number[]>([0, 0, 0]);
 
-const AIParticipantsModal: React.FC<AIParticipantsModalProps> = ({ isOpen, onClose, categories, onConfirm }) => {
-  const [quantity, setQuantity] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState('');
-
-  if (!isOpen) return null;
-
-  const handleConfirm = () => {
-    if (selectedCategory) {
-      onConfirm(quantity, selectedCategory);
-      onClose();
-      setQuantity(1);
-      setSelectedCategory('');
+  useEffect(() => {
+    if (match && isOpen) {
+      setTeam1Sets(match.team1Score || [0, 0, 0]);
+      setTeam2Sets(match.team2Score || [0, 0, 0]);
     }
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-dark-800">Adicionar Duplas com IA</h3>
-          <button onClick={onClose} className="text-dark-400 hover:text-dark-600">
-            <X size={20} />
-          </button>
-        </div>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-dark-700 mb-2">
-              Quantidade de Duplas
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="20"
-              value={quantity}
-              onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-semibold text-dark-700 mb-2">
-              Categoria
-            </label>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="">Selecione uma categoria</option>
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        
-        <div className="flex justify-end space-x-3 mt-6">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-dark-600 hover:bg-gray-50 transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleConfirm}
-            disabled={!selectedCategory}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Confirmar
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const ScoreModal: React.FC<ScoreModalProps> = ({ isOpen, onClose, match, onSave }) => {
-  const [set1Team1, setSet1Team1] = useState('');
-  const [set1Team2, setSet1Team2] = useState('');
-  const [set2Team1, setSet2Team1] = useState('');
-  const [set2Team2, setSet2Team2] = useState('');
-  const [set3Team1, setSet3Team1] = useState('');
-  const [set3Team2, setSet3Team2] = useState('');
+  }, [match, isOpen]);
 
   if (!isOpen || !match) return null;
 
   const handleSave = () => {
-    const sets = [];
-    if (set1Team1 && set1Team2) sets.push(`${set1Team1}-${set1Team2}`);
-    if (set2Team1 && set2Team2) sets.push(`${set2Team1}-${set2Team2}`);
-    if (set3Team1 && set3Team2) sets.push(`${set3Team1}-${set3Team2}`);
+    const team1Total = team1Sets.reduce((a, b) => a + b, 0);
+    const team2Total = team2Sets.reduce((a, b) => a + b, 0);
+    const winner = team1Total > team2Total ? 1 : 2;
     
-    const score = sets.join(', ');
-    onSave(match.id, score);
+    onSave(match.id, team1Sets, team2Sets, winner);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-dark-800">Inserir Placar</h3>
-          <button onClick={onClose} className="text-dark-400 hover:text-dark-600">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl p-6 w-full max-w-md">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-lg font-bold text-gray-900">Editar Placar</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             <X size={20} />
           </button>
         </div>
-        
-        <div className="mb-4">
-          <p className="text-sm text-dark-600">{match.team1} vs {match.team2}</p>
-        </div>
 
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-dark-700 mb-2">1º Set</label>
-            <div className="flex space-x-2">
-              <input
-                type="number"
-                min="0"
-                max="7"
-                value={set1Team1}
-                onChange={(e) => setSet1Team1(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                placeholder="0"
-              />
-              <span className="flex items-center">x</span>
-              <input
-                type="number"
-                min="0"
-                max="7"
-                value={set1Team2}
-                onChange={(e) => setSet1Team2(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                placeholder="0"
-              />
+          <div className="text-center">
+            <p className="font-medium text-gray-900">{match.team1}</p>
+            <p className="text-sm text-gray-600">vs</p>
+            <p className="font-medium text-gray-900">{match.team2}</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {match.team1}
+              </label>
+              {[0, 1, 2].map(setIndex => (
+                <input
+                  key={setIndex}
+                  type="number"
+                  min="0"
+                  max="7"
+                  value={team1Sets[setIndex]}
+                  onChange={(e) => {
+                    const newSets = [...team1Sets];
+                    newSets[setIndex] = parseInt(e.target.value) || 0;
+                    setTeam1Sets(newSets);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
+                  placeholder={`Set ${setIndex + 1}`}
+                />
+              ))}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {match.team2}
+              </label>
+              {[0, 1, 2].map(setIndex => (
+                <input
+                  key={setIndex}
+                  type="number"
+                  min="0"
+                  max="7"
+                  value={team2Sets[setIndex]}
+                  onChange={(e) => {
+                    const newSets = [...team2Sets];
+                    newSets[setIndex] = parseInt(e.target.value) || 0;
+                    setTeam2Sets(newSets);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
+                  placeholder={`Set ${setIndex + 1}`}
+                />
+              ))}
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-dark-700 mb-2">2º Set</label>
-            <div className="flex space-x-2">
-              <input
-                type="number"
-                min="0"
-                max="7"
-                value={set2Team1}
-                onChange={(e) => setSet2Team1(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                placeholder="0"
-              />
-              <span className="flex items-center">x</span>
-              <input
-                type="number"
-                min="0"
-                max="7"
-                value={set2Team2}
-                onChange={(e) => setSet2Team2(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                placeholder="0"
-              />
-            </div>
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleSave}
+              className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+            >
+              Salvar
+            </button>
           </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-dark-700 mb-2">3º Set (opcional)</label>
-            <div className="flex space-x-2">
-              <input
-                type="number"
-                min="0"
-                max="7"
-                value={set3Team1}
-                onChange={(e) => setSet3Team1(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                placeholder="0"
-              />
-              <span className="flex items-center">x</span>
-              <input
-                type="number"
-                min="0"
-                max="7"
-                value={set3Team2}
-                onChange={(e) => setSet3Team2(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                placeholder="0"
-              />
-            </div>
-          </div>
-        </div>
-        
-        <div className="flex justify-end space-x-3 mt-6">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-dark-600 hover:bg-gray-50 transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleSave}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-          >
-            Salvar
-          </button>
         </div>
       </div>
     </div>
@@ -297,1248 +147,839 @@ const TournamentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const [activeTab, setActiveTab] = useState('info');
-  const [activeSubTab, setActiveSubTab] = useState('geral');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedDate, setSelectedDate] = useState('all');
-  const [selectedCourt, setSelectedCourt] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showAIModal, setShowAIModal] = useState(false);
-  const [showScoreModal, setShowScoreModal] = useState(false);
-  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-  const [participants, setParticipants] = useState<Participant[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [showCategoryFilter, setShowCategoryFilter] = useState(false);
-  const [showDateFilter, setShowDateFilter] = useState(false);
-  const [showCourtFilter, setShowCourtFilter] = useState(false);
-
-  // Mock tournament data
-  const tournament = {
-    id: id || '1',
-    name: 'Open Padel',
-    club: 'Elite Padel',
-    location: { city: 'São Paulo', state: 'SP' },
-    startDate: '2025-07-11',
-    endDate: '2025-07-13',
-    registrationFee: 120.00,
-    description: 'Torneio aberto para todas as categorias',
-    categories: ['Open Masculina', 'Open Feminina', '2ª Masc', '2ª Fem', '3ª Masc', '3ª Fem', '4ª Masc', '4ª Fem', '5ª Masc', '5ª Fem', '6ª Masc', '6ª Fem', '7ª Masc', '7ª Fem', 'Mista A', 'Mista B', 'Mista C', 'Mista D'],
-    courts: ['Quadra 1', 'Quadra 2', 'Quadra 3', 'Quadra 4'],
-    dates: ['11/07/2025', '12/07/2025', '13/07/2025'],
-    createdBy: 'clube@teste.com' // Mock club email
-  };
-
-  // Get real tournament data from localStorage
-  const clubTournaments = JSON.parse(localStorage.getItem('clubTournaments') || '[]');
-  const realTournamentData = clubTournaments.find((t: any) => t.id === id);
-  const hasParticipantLimit = realTournamentData?.hasParticipantLimit && realTournamentData?.maxParticipants;
+  const [tournament, setTournament] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState('informacoes');
+  const [activeSubTab, setActiveSubTab] = useState('gerais');
+  const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState<any>(null);
 
   // Check if current user is the tournament creator
-  const isCreator = user && profile?.user_type === 'club' && profile.email === tournament.createdBy;
-  const isAthlete = user && profile?.user_type === 'athlete';
+  const isCreator = user && profile?.user_type === 'club' && tournament?.club_id === user.id;
 
-  // Initialize mock matches
   useEffect(() => {
-    setMatches([
-      {
-        id: 'MATCH001',
-        team1: 'João Silva / Pedro Santos',
-        team2: 'Carlos Lima / Rafael Dias',
-        score: '6-4, 6-3',
-        court: 'Quadra 1',
-        date: '11/07/2025',
-        time: '09:00',
-        category: 'Open Masculina',
-        group: 'Chave A',
-        status: 'completed'
-      },
-      {
-        id: 'MATCH002',
-        team1: 'Maria Costa / Ana Lima',
-        team2: 'Julia Rocha / Camila Souza',
-        score: '',
-        court: 'Quadra 2',
-        date: '11/07/2025',
-        time: '10:30',
-        category: 'Open Feminina',
-        group: 'Chave B',
-        status: 'scheduled'
-      },
-      {
-        id: 'MATCH003',
-        team1: 'Bruno Alves / Diego Santos',
-        team2: 'Lucas Ferreira / Thiago Costa',
-        score: '4-6, 6-7',
-        court: 'Quadra 3',
-        date: '12/07/2025',
-        time: '14:00',
-        category: '2ª Masculina',
-        group: 'Chave A',
-        status: 'completed'
-      }
-    ]);
-  }, []);
-
-  // Get categories with registered participants
-  const categoriesWithRegistrations = tournament.categories.filter(category => 
-    participants.some(p => p.category === category)
-  );
-
-  const filteredParticipants = participants.filter(participant => {
-    const matchesCategory = selectedCategory === 'all' || participant.category === selectedCategory;
-    const matchesSearch = participant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (participant.partner && participant.partner.toLowerCase().includes(searchTerm.toLowerCase()));
-    return matchesCategory && matchesSearch;
-  });
-
-  const generateAIParticipants = (quantity: number, category: string) => {
-    const firstNames = ['João', 'Maria', 'Pedro', 'Ana', 'Carlos', 'Lucia', 'Rafael', 'Camila', 'Bruno', 'Julia', 'Diego', 'Fernanda', 'Lucas', 'Beatriz', 'Thiago', 'Mariana', 'Gabriel', 'Larissa', 'Felipe', 'Amanda'];
-    const lastNames = ['Silva', 'Santos', 'Oliveira', 'Souza', 'Rodrigues', 'Ferreira', 'Alves', 'Pereira', 'Lima', 'Gomes', 'Costa', 'Ribeiro', 'Martins', 'Carvalho', 'Almeida', 'Lopes', 'Soares', 'Fernandes', 'Vieira', 'Barbosa'];
-    
-    const newParticipants: Participant[] = [];
-    
-    for (let i = 0; i < quantity; i++) {
-      const player1 = `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
-      const player2 = `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
+    const loadTournament = () => {
+      const clubTournaments = JSON.parse(localStorage.getItem('clubTournaments') || '[]');
+      const foundTournament = clubTournaments.find((t: any) => t.id === id);
       
-      newParticipants.push({
-        id: `ai-${Date.now()}-${i}`,
-        name: player1,
-        partner: player2,
-        category
-      });
-    }
-    
-    setParticipants(prev => [...prev, ...newParticipants]);
-  };
-
-  const generateGroups = (category?: string) => {
-    const categoriesToGenerate = category ? [category] : categoriesWithRegistrations;
-    const newGroups: Group[] = [];
-
-    categoriesToGenerate.forEach(cat => {
-      const categoryParticipants = participants.filter(p => p.category === cat);
-      if (categoryParticipants.length === 0) return;
-
-      // Create groups of 3 teams each
-      const groupCount = Math.ceil(categoryParticipants.length / 3);
-      
-      for (let i = 0; i < groupCount; i++) {
-        const groupTeams = categoryParticipants.slice(i * 3, (i + 1) * 3);
-        const groupName = `${cat} - Chave ${String.fromCharCode(65 + i)}`;
-        
-        const teams = groupTeams.map(participant => ({
-          name: `${participant.name} / ${participant.partner}`,
-          wins: Math.floor(Math.random() * 3),
-          losses: Math.floor(Math.random() * 2),
-          setsWon: Math.floor(Math.random() * 6) + 1,
-          setsLost: Math.floor(Math.random() * 4),
-          gamesWon: Math.floor(Math.random() * 30) + 10,
-          gamesLost: Math.floor(Math.random() * 25) + 5,
-          setBalance: 0,
-          gameBalance: 0
-        }));
-
-        // Calculate balances
-        teams.forEach(team => {
-          team.setBalance = team.setsWon - team.setsLost;
-          team.gameBalance = team.gamesWon - team.gamesLost;
-        });
-
-        // Sort by wins, then by set balance, then by game balance
-        teams.sort((a, b) => {
-          if (b.wins !== a.wins) return b.wins - a.wins;
-          if (b.setBalance !== a.setBalance) return b.setBalance - a.setBalance;
-          return b.gameBalance - a.gameBalance;
-        });
-
-        // Generate matches between teams in the group
-        const groupMatches = [];
-        for (let j = 0; j < teams.length; j++) {
-          for (let k = j + 1; k < teams.length; k++) {
-            groupMatches.push({
-              id: `match-${i}-${j}-${k}`,
-              team1: teams[j].name,
-              team2: teams[k].name,
-              score: Math.random() > 0.5 ? '6-4, 6-3' : '4-6, 6-7',
-              date: tournament.dates[Math.floor(Math.random() * tournament.dates.length)],
-              time: `${9 + Math.floor(Math.random() * 8)}:${Math.random() > 0.5 ? '00' : '30'}`,
-              court: tournament.courts[Math.floor(Math.random() * tournament.courts.length)],
-              status: Math.random() > 0.3 ? 'completed' : 'scheduled' as 'scheduled' | 'completed'
-            });
-          }
-        }
-
-        newGroups.push({
-          id: `group-${cat}-${i}`,
-          name: groupName,
-          teams,
-          matches: groupMatches
-        });
+      if (foundTournament) {
+        setTournament(foundTournament);
       }
-    });
+      setLoading(false);
+    };
 
-    if (category) {
-      setGroups(prev => [...prev.filter(g => !g.name.startsWith(category)), ...newGroups]);
-    } else {
-      setGroups(newGroups);
-    }
-  };
+    loadTournament();
+  }, [id]);
 
-  const handleEditMatch = (match: Match) => {
+  const handleEditScore = (match: any) => {
     setSelectedMatch(match);
-    setShowScoreModal(true);
+    setEditModalOpen(true);
   };
 
-  const handleSaveScore = (matchId: string, score: string) => {
-    setMatches(prev => prev.map(match => 
-      match.id === matchId 
-        ? { ...match, score, status: 'completed' as const }
-        : match
-    ));
+  const handleSaveScore = (matchId: string, team1Score: number[], team2Score: number[], winner: number) => {
+    // Update match score logic here
+    console.log('Saving score:', { matchId, team1Score, team2Score, winner });
   };
 
-  const renderParticipantsTab = () => (
-    <div className="space-y-6">
-      {/* Header with controls */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-dark-800">Participantes Inscritos</h2>
-          <p className="text-dark-600">{participants.length} duplas inscritas</p>
-        </div>
-        
-        {/* Controls row */}
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Search */}
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400" size={18} />
-            <input
-              type="text"
-              placeholder="Buscar por nome do atleta..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            />
-          </div>
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
 
-          {/* Category Filter */}
-          <div className="relative">
-            <button
-              onClick={() => setShowCategoryFilter(!showCategoryFilter)}
-              className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Filter size={18} className="mr-2" />
-              Categoria
-              <ChevronDown size={16} className="ml-2" />
-            </button>
-            {showCategoryFilter && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-1 z-50 border border-gray-100">
-                <button
-                  onClick={() => {
-                    setSelectedCategory('all');
-                    setShowCategoryFilter(false);
-                  }}
-                  className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${selectedCategory === 'all' ? 'bg-primary-50 text-primary-700' : 'text-dark-700'}`}
-                >
-                  Todas as Categorias
-                </button>
-                {categoriesWithRegistrations.map(category => (
-                  <button
-                    key={category}
-                    onClick={() => {
-                      setSelectedCategory(category);
-                      setShowCategoryFilter(false);
-                    }}
-                    className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${selectedCategory === category ? 'bg-primary-50 text-primary-700' : 'text-dark-700'}`}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Action buttons - only show for club users */}
-          {isCreator && (
-            <>
-              <button
-                onClick={() => setShowAIModal(true)}
-                className="flex items-center px-4 py-2 bg-accent-500 text-dark-900 rounded-lg hover:bg-accent-400 transition-colors font-semibold"
-              >
-                <Bot size={18} className="mr-2" />
-                Dupla c/ AI
-              </button>
-              <button className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold">
-                <Plus size={18} className="mr-2" />
-                Adicionar Dupla
-              </button>
-            </>
-          )}
+  if (!tournament) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Torneio não encontrado</h2>
+          <button
+            onClick={() => navigate('/tournaments')}
+            className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700"
+          >
+            Voltar aos Torneios
+          </button>
         </div>
       </div>
+    );
+  }
 
-      {/* Category tabs - only show if there are registered participants */}
-      {categoriesWithRegistrations.length > 0 && (
-        <div className="border-b border-gray-200">
-          <div className="flex space-x-1 overflow-x-auto pb-2">
-            <button
-              onClick={() => setSelectedCategory('all')}
-              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                selectedCategory === 'all'
-                  ? 'bg-primary-600 text-white'
-                  : 'text-dark-600 hover:bg-gray-100'
-              }`}
-            >
-              Todas ({participants.length})
-            </button>
-            {categoriesWithRegistrations.map(category => {
-              const count = participants.filter(p => p.category === category).length;
-              return (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                    selectedCategory === category
-                      ? 'bg-primary-600 text-white'
-                      : 'text-dark-600 hover:bg-gray-100'
-                  }`}
-                >
-                  {category} ({count})
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+  const tabs = [
+    { id: 'informacoes', name: 'Informações', icon: Info },
+    { id: 'inscritos', name: 'Inscritos', icon: Users },
+    { id: 'grupos', name: 'Grupos', icon: Trophy },
+    { id: 'jogos', name: 'Jogos', icon: Calendar },
+    { id: 'agenda', name: 'Agenda', icon: Clock },
+    { id: 'resultados', name: 'Resultados', icon: Medal },
+    { id: 'ao-vivo', name: 'Ao Vivo', icon: Play }
+  ];
 
-      {/* Participants list */}
-      {filteredParticipants.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredParticipants.map(participant => (
-            <div key={participant.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-dark-800">
-                    {participant.name} / {participant.partner}
-                  </h3>
-                  <p className="text-sm text-primary-600 font-medium">{participant.category}</p>
-                </div>
-                <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                  <Users size={16} className="text-primary-600" />
-                </div>
+  const subTabs = [
+    { id: 'gerais', name: 'Gerais' },
+    { id: 'contato', name: 'Contato' },
+    { id: 'localizacao', name: 'Localização' },
+    { id: 'regras', name: 'Regras' },
+    { id: 'faq', name: 'FAQ' }
+  ];
+
+  const mockGroups = [
+    {
+      name: 'Grupo A',
+      teams: [
+        { name: 'João Silva / Pedro Santos', wins: 2, gamesFor: 24, gamesAgainst: 18, position: 1 },
+        { name: 'Maria Costa / Ana Lima', wins: 1, gamesFor: 20, gamesAgainst: 22, position: 2 },
+        { name: 'Carlos Dias / Rafael Alves', wins: 0, gamesFor: 16, gamesAgainst: 20, position: 3 }
+      ],
+      matches: [
+        { id: '1', team1: 'João Silva / Pedro Santos', team2: 'Maria Costa / Ana Lima', score: '6-4, 6-3', status: 'completed', team1Score: [6, 6], team2Score: [4, 3] },
+        { id: '2', team1: 'João Silva / Pedro Santos', team2: 'Carlos Dias / Rafael Alves', score: 'vs', status: 'scheduled', team1Score: [], team2Score: [] },
+        { id: '3', team1: 'Maria Costa / Ana Lima', team2: 'Carlos Dias / Rafael Alves', score: 'vs', status: 'scheduled', team1Score: [], team2Score: [] }
+      ]
+    }
+  ];
+
+  const mockMatches = [
+    { id: 'MATCH001', team1: 'João Silva / Pedro Santos', team2: 'Carlos Lima / Rafael Dias', score: '6-4, 6-3', status: 'Finalizado', court: 'Quadra 1', date: '11/07/2025', time: '09:00', category: 'Open Masculina', group: 'Grupo A' },
+    { id: 'MATCH002', team1: 'Maria Costa / Ana Lima', team2: 'Julia Rocha / Camila Souza', score: 'vs', status: 'Agendado', court: 'Quadra 2', date: '11/07/2025', time: '10:30', category: 'Open Feminina', group: 'Grupo B' }
+  ];
+
+  const mockCourts = [
+    { id: '1', name: 'Quadra Central', status: 'Ao Vivo', match: 'João Silva / Pedro vs Maria Costa / Ana', streamUrl: 'https://youtube.com/live/123' },
+    { id: '2', name: 'Quadra 2', status: 'Próximo', match: 'Carlos Lima / Rafael vs Julia Rocha / Camila', streamUrl: null },
+    { id: '3', name: 'Quadra 3', status: 'Livre', match: null, streamUrl: null }
+  ];
+
+  const mockChampions = [
+    { category: 'Open Masculina', champion: 'João Silva / Pedro Santos', runnerUp: 'Carlos Lima / Rafael Dias', finalScore: '6-4, 6-3' },
+    { category: 'Open Feminina', champion: 'Maria Costa / Ana Lima', runnerUp: 'Julia Rocha / Camila Souza', finalScore: '7-5, 6-4' }
+  ];
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'informacoes':
+        return renderInformacoes();
+      case 'inscritos':
+        return renderInscritos();
+      case 'grupos':
+        return renderGrupos();
+      case 'jogos':
+        return renderJogos();
+      case 'agenda':
+        return renderAgenda();
+      case 'resultados':
+        return renderResultados();
+      case 'ao-vivo':
+        return renderAoVivo();
+      default:
+        return renderInformacoes();
+    }
+  };
+
+  const renderInformacoes = () => {
+    switch (activeSubTab) {
+      case 'gerais':
+        return (
+          <div className="space-y-8">
+            {/* Descrição do Torneio */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center mb-4">
+                <Info className="text-purple-600 mr-3" size={24} />
+                <h3 className="text-xl font-bold text-gray-900">Descrição do Torneio</h3>
               </div>
+              <p className="text-gray-700 leading-relaxed">
+                {tournament.description || 'Torneio de padel com as melhores duplas da região. Venha participar desta competição emocionante e mostre suas habilidades nas quadras!'}
+              </p>
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <Users size={64} className="text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-dark-900 mb-2">
-            {participants.length === 0 ? 'Nenhuma dupla inscrita' : 'Nenhuma dupla encontrada'}
-          </h3>
-          <p className="text-dark-500">
-            {participants.length === 0 
-              ? 'As inscrições ainda não começaram ou nenhuma dupla se inscreveu.'
-              : 'Tente ajustar os filtros de busca.'}
-          </p>
-        </div>
-      )}
-    </div>
-  );
 
-  const renderGroupsTab = () => (
-    <div className="space-y-6">
-      {/* Header with controls */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-dark-800">Grupos</h2>
-          <p className="text-dark-600">Chaveamento por categorias</p>
-        </div>
-        
-        {/* Controls row */}
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Search */}
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400" size={18} />
-            <input
-              type="text"
-              placeholder="Buscar por nome do atleta..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            />
-          </div>
-
-          {/* Category Filter */}
-          <div className="relative">
-            <button
-              onClick={() => setShowCategoryFilter(!showCategoryFilter)}
-              className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Filter size={18} className="mr-2" />
-              Categoria
-              <ChevronDown size={16} className="ml-2" />
-            </button>
-            {showCategoryFilter && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-1 z-50 border border-gray-100">
-                <button
-                  onClick={() => {
-                    setSelectedCategory('all');
-                    setShowCategoryFilter(false);
-                  }}
-                  className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${selectedCategory === 'all' ? 'bg-primary-50 text-primary-700' : 'text-dark-700'}`}
-                >
-                  Todas as Categorias
-                </button>
-                {categoriesWithRegistrations.map(category => (
-                  <button
-                    key={category}
-                    onClick={() => {
-                      setSelectedCategory(category);
-                      setShowCategoryFilter(false);
-                    }}
-                    className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${selectedCategory === category ? 'bg-primary-50 text-primary-700' : 'text-dark-700'}`}
-                  >
-                    {category}
-                  </button>
-                ))}
+            {/* Datas Importantes */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center mb-4">
+                <Calendar className="text-purple-600 mr-3" size={24} />
+                <h3 className="text-xl font-bold text-gray-900">Datas Importantes</h3>
               </div>
-            )}
-          </div>
-
-          {/* Action buttons - only show for club users */}
-          {isCreator && (
-            <>
-              <button
-                onClick={() => generateGroups()}
-                className="flex items-center px-4 py-2 bg-accent-500 text-dark-900 rounded-lg hover:bg-accent-400 transition-colors font-semibold"
-              >
-                <Trophy size={18} className="mr-2" />
-                Gerar Todas
-              </button>
-              <button
-                onClick={() => selectedCategory !== 'all' && generateGroups(selectedCategory)}
-                disabled={selectedCategory === 'all'}
-                className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold"
-              >
-                <Trophy size={18} className="mr-2" />
-                Gerar Categoria
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Category tabs */}
-      {categoriesWithRegistrations.length > 0 && (
-        <div className="border-b border-gray-200">
-          <div className="flex space-x-1 overflow-x-auto pb-2">
-            <button
-              onClick={() => setSelectedCategory('all')}
-              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                selectedCategory === 'all'
-                  ? 'bg-primary-600 text-white'
-                  : 'text-dark-600 hover:bg-gray-100'
-              }`}
-            >
-              Todas
-            </button>
-            {categoriesWithRegistrations.map(category => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                  selectedCategory === category
-                    ? 'bg-primary-600 text-white'
-                    : 'text-dark-600 hover:bg-gray-100'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Groups display */}
-      {groups.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {groups
-            .filter(group => selectedCategory === 'all' || group.name.includes(selectedCategory))
-            .map(group => (
-              <div key={group.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-                <div className="bg-primary-600 text-white px-4 py-3">
-                  <h3 className="text-lg font-bold">{group.name}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center p-4 bg-purple-50 rounded-lg">
+                  <CheckCircle className="text-green-600 mr-3" size={20} />
+                  <div>
+                    <p className="font-semibold text-gray-900">Início das Inscrições</p>
+                    <p className="text-gray-600">{new Date(tournament.startDate).toLocaleDateString('pt-BR')}</p>
+                  </div>
                 </div>
-                
-                {/* Group standings table */}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-2 px-2 font-medium text-gray-600">Dupla</th>
-                        <th className="text-center py-2 px-1 font-medium text-gray-600">V</th>
-                        <th className="text-center py-2 px-1 font-medium text-gray-600">Saldo Games</th>
-                        <th className="text-center py-2 px-1 font-medium text-gray-600">Games Pro</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {group.teams.map((team, index) => (
-                        <tr key={index} className={
-                          index === 0 ? 'bg-accent-50' : 
-                          index === 1 ? 'bg-green-50' : 
-                          index === 2 ? 'bg-red-50' : ''
-                        }>
-                          <td className="py-2 px-2">
-                            <div className="flex items-center">
-                              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mr-2 ${
-                                index === 0 ? 'bg-accent-500 text-dark-900' : 
-                                index === 1 ? 'bg-green-500 text-white' :
-                                index === 2 ? 'bg-red-500 text-white' :
-                                'bg-gray-200 text-gray-600'
-                              }`}>
-                                {index + 1}
-                              </div>
-                              <span className="text-xs font-medium text-dark-900 truncate">{team.name}</span>
-                            </div>
-                          </td>
-                          <td className="text-center py-2 px-1 font-medium">
-                            {team.wins}
-                          </td>
-                          <td className="text-center py-2 px-1 text-blue-600 font-medium">
-                            {team.gameBalance > 0 ? '+' : ''}{team.gameBalance}
-                          </td>
-                          <td className="text-center py-2 px-1 text-green-600 font-medium">
-                            {team.gamesWon}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="flex items-center p-4 bg-purple-50 rounded-lg">
+                  <Clock className="text-orange-600 mr-3" size={20} />
+                  <div>
+                    <p className="font-semibold text-gray-900">Fim das Inscrições</p>
+                    <p className="text-gray-600">{new Date(tournament.endDate).toLocaleDateString('pt-BR')}</p>
+                  </div>
                 </div>
-
-                {/* Group matches */}
-                <div className="px-4 py-3 border-t border-gray-200">
-                  <h4 className="text-sm font-semibold text-dark-800 mb-2">Jogos</h4>
-                  <div className="space-y-3">
-                    {group.matches.map((match, matchIndex) => (
-                      <div key={matchIndex} className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                        {/* Mobile Layout - Stacked */}
-                        <div className="block md:hidden space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium text-dark-800">{match.team1}</span>
-                            {isClubOwner && (
-                              <button
-                                onClick={() => handleEditScore(match)}
-                                className="p-1 text-gray-400 hover:text-primary-600 transition-colors"
-                                title="Editar placar"
-                              >
-                                <Edit2 size={14} />
-                              </button>
-                            )}
-                          </div>
-                          <div className="text-center">
-                            <span className="text-primary-600 font-bold text-lg">vs</span>
-                            {match.score && (
-                              <span className="ml-2 text-lg font-bold text-dark-800">{match.score}</span>
-                            )}
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium text-dark-800">{match.team2}</span>
-                            <span className={`text-xs px-2 py-1 rounded-full ${
-                              match.status === 'Agendado' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
-                            }`}>
-                              {match.status}
-                            </span>
-                          </div>
-                          <div className="text-xs text-gray-500 text-center">
-                            {match.date} • {match.time} • {match.court}
-                          </div>
-                        </div>
-
-                        {/* Desktop Layout - Inline */}
-                        <div className="hidden md:flex items-center justify-between">
-                          <div className="flex items-center space-x-4 flex-1">
-                            <span className="text-sm font-medium text-dark-800 min-w-0 flex-1">{match.team1}</span>
-                            <span className="text-primary-600 font-bold">vs</span>
-                            {match.score && (
-                              <span className="text-lg font-bold text-dark-800 px-2">{match.score}</span>
-                            )}
-                            <span className="text-sm font-medium text-dark-800 min-w-0 flex-1">{match.team2}</span>
-                          </div>
-                          <div className="flex items-center space-x-3">
-                            <span className={`text-xs px-2 py-1 rounded-full ${
-                              match.status === 'Agendado' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
-                            }`}>
-                              {match.status}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {match.date} • {match.time} • {match.court}
-                            </span>
-                            {isClubOwner && (
-                              <button
-                                onClick={() => handleEditScore(match)}
-                                className="p-1 text-gray-400 hover:text-primary-600 transition-colors"
-                                title="Editar placar"
-                              >
-                                <Edit2 size={14} />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                <div className="flex items-center p-4 bg-purple-50 rounded-lg">
+                  <Trophy className="text-purple-600 mr-3" size={20} />
+                  <div>
+                    <p className="font-semibold text-gray-900">Data do Torneio</p>
+                    <p className="text-gray-600">{new Date(tournament.startDate).toLocaleDateString('pt-BR')}</p>
+                  </div>
+                </div>
+                <div className="flex items-center p-4 bg-purple-50 rounded-lg">
+                  <Edit2 className="text-blue-600 mr-3" size={20} />
+                  <div>
+                    <p className="font-semibold text-gray-900">Prazo de Alteração</p>
+                    <p className="text-gray-600">Até 24h antes</p>
                   </div>
                 </div>
               </div>
-            ))}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <Trophy size={64} className="text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-dark-900 mb-2">Nenhum grupo gerado</h3>
-          <p className="text-dark-500">
-            {participants.length === 0 
-              ? 'É necessário ter duplas inscritas para gerar os grupos.'
-              : 'Clique em "Gerar Grupos" para criar o chaveamento.'}
-          </p>
-        </div>
-      )}
-    </div>
-  );
+            </div>
 
-  const renderMatchesTab = () => (
-    <div className="space-y-6">
-      {/* Header with controls */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-dark-800">Jogos</h2>
-          <p className="text-dark-600">Programação de partidas</p>
-        </div>
-        
-        {/* Controls row */}
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Search */}
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400" size={18} />
-            <input
-              type="text"
-              placeholder="Buscar por nome do atleta..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            />
-          </div>
-
-          {/* Date Filter */}
-          <div className="relative">
-            <button
-              onClick={() => setShowDateFilter(!showDateFilter)}
-              className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Calendar size={18} className="mr-2" />
-              Data
-              <ChevronDown size={16} className="ml-2" />
-            </button>
-            {showDateFilter && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-1 z-50 border border-gray-100">
-                <button
-                  onClick={() => {
-                    setSelectedDate('all');
-                    setShowDateFilter(false);
-                  }}
-                  className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${selectedDate === 'all' ? 'bg-primary-50 text-primary-700' : 'text-dark-700'}`}
-                >
-                  Todas as Datas
-                </button>
-                {tournament.dates.map(date => (
-                  <button
-                    key={date}
-                    onClick={() => {
-                      setSelectedDate(date);
-                      setShowDateFilter(false);
-                    }}
-                    className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${selectedDate === date ? 'bg-primary-50 text-primary-700' : 'text-dark-700'}`}
-                  >
-                    {date}
-                  </button>
-                ))}
+            {/* Taxas de Inscrição */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center mb-4">
+                <DollarSign className="text-green-600 mr-3" size={24} />
+                <h3 className="text-xl font-bold text-gray-900">Taxas de Inscrição</h3>
               </div>
-            )}
-          </div>
-
-          {/* Court Filter */}
-          <div className="relative">
-            <button
-              onClick={() => setShowCourtFilter(!showCourtFilter)}
-              className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Trophy size={18} className="mr-2" />
-              Quadra
-              <ChevronDown size={16} className="ml-2" />
-            </button>
-            {showCourtFilter && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-1 z-50 border border-gray-100">
-                <button
-                  onClick={() => {
-                    setSelectedCourt('all');
-                    setShowCourtFilter(false);
-                  }}
-                  className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${selectedCourt === 'all' ? 'bg-primary-50 text-primary-700' : 'text-dark-700'}`}
-                >
-                  Todas as Quadras
-                </button>
-                {tournament.courts.map(court => (
-                  <button
-                    key={court}
-                    onClick={() => {
-                      setSelectedCourt(court);
-                      setShowCourtFilter(false);
-                    }}
-                    className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-50 ${selectedCourt === court ? 'bg-primary-50 text-primary-700' : 'text-dark-700'}`}
-                  >
-                    {court}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Action button - only show for club users */}
-          {isCreator && (
-            <button className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold">
-              <Play size={18} className="mr-2" />
-              Gerar Jogos
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Date tabs */}
-      <div className="border-b border-gray-200">
-        <div className="flex space-x-1 overflow-x-auto pb-2">
-          <button
-            onClick={() => setSelectedDate('all')}
-            className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-              selectedDate === 'all'
-                ? 'bg-primary-600 text-white'
-                : 'text-dark-600 hover:bg-gray-100'
-            }`}
-          >
-            Todas as Datas
-          </button>
-          {tournament.dates.map(date => (
-            <button
-              key={date}
-              onClick={() => setSelectedDate(date)}
-              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                selectedDate === date
-                  ? 'bg-primary-600 text-white'
-                  : 'text-dark-600 hover:bg-gray-100'
-              }`}
-            >
-              {date}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Court tabs */}
-      <div className="border-b border-gray-200">
-        <div className="flex space-x-1 overflow-x-auto pb-2">
-          <button
-            onClick={() => setSelectedCourt('all')}
-            className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-              selectedCourt === 'all'
-                ? 'bg-accent-600 text-dark-900'
-                : 'text-dark-600 hover:bg-gray-100'
-            }`}
-          >
-            Todas as Quadras
-          </button>
-          {tournament.courts.map(court => (
-            <button
-              key={court}
-              onClick={() => setSelectedCourt(court)}
-              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                selectedCourt === court
-                  ? 'bg-accent-600 text-dark-900'
-                  : 'text-dark-600 hover:bg-gray-100'
-              }`}
-            >
-              {court}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Matches content */}
-      <div className="space-y-4">
-        {matches
-          .filter(match => {
-            const matchesDate = selectedDate === 'all' || match.date === selectedDate;
-            const matchesCourt = selectedCourt === 'all' || match.court === selectedCourt;
-            const matchesSearch = searchTerm === '' || 
-              match.team1.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              match.team2.toLowerCase().includes(searchTerm.toLowerCase());
-            return matchesDate && matchesCourt && matchesSearch;
-          })
-          .map(match => (
-            <div key={match.id} className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    match.status === 'Finalizado' ? 'bg-green-100 text-green-800' :
-                    match.status === 'Em Andamento' ? 'bg-blue-100 text-blue-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {match.status}
-                  </span>
-                  <span className="text-sm text-dark-600">{match.id}</span>
-                </div>
-                {isCreator && (
-                  <button
-                    onClick={() => handleEditMatch(match)}
-                    className="p-2 text-dark-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                  >
-                    <Edit2 size={16} />
-                  </button>
-                )}
-              </div>
-
-              <div className="flex items-center justify-center mb-3">
-                <span className="text-lg font-semibold text-dark-800">{match.team1}</span>
-                <div className="mx-4 flex items-center">
-                  <span className="text-primary-600 font-bold text-xl">vs</span>
-                  {match.score && (
-                    <span className="ml-2 text-xl font-bold text-dark-800">{match.score}</span>
-                  )}
-                </div>
-                <span className="text-lg font-semibold text-dark-800">{match.team2}</span>
-              </div>
-
-              <div className="text-sm text-dark-600 text-left">
-                {match.court} • {match.date} • {match.time} • {match.category} • {match.group}
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="px-4 py-3 text-left font-semibold text-gray-900">Categoria</th>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-900">Valor</th>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-900">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tournament.categories?.map((category: string, index: number) => (
+                      <tr key={index} className="border-t border-gray-200">
+                        <td className="px-4 py-3 font-medium text-gray-900">{category}</td>
+                        <td className="px-4 py-3 text-green-600 font-bold">R$ {tournament.registrationFee?.toFixed(2)}</td>
+                        <td className="px-4 py-3">
+                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium">
+                            Disponível
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
-          ))}
-        
-        {/* Empty state if no matches found */}
-        {matches.filter(match => {
-          const matchesDate = selectedDate === 'all' || match.date === selectedDate;
-          const matchesCourt = selectedCourt === 'all' || match.court === selectedCourt;
-          const matchesSearch = searchTerm === '' || 
-            match.team1.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            match.team2.toLowerCase().includes(searchTerm.toLowerCase());
-          return matchesDate && matchesCourt && matchesSearch;
-        }).length === 0 && (
-          <div className="text-center py-12">
-            <Play size={64} className="text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-dark-900 mb-2">Nenhum jogo encontrado</h3>
-            <p className="text-dark-500">
-              Tente ajustar os filtros ou aguarde a programação dos jogos.
-            </p>
+
+            {/* Local do Evento */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center mb-4">
+                <MapPin className="text-red-600 mr-3" size={24} />
+                <h3 className="text-xl font-bold text-gray-900">Local do Evento</h3>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-gray-700 mb-4">
+                    <strong>{tournament.mainClub}</strong><br />
+                    Rua das Quadras, 123<br />
+                    São Paulo - SP, 01234-567
+                  </p>
+                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
+                    <Navigation className="mr-2" size={16} />
+                    Como Chegar
+                  </button>
+                </div>
+                <div className="bg-gray-200 rounded-lg h-48 flex items-center justify-center">
+                  <p className="text-gray-600">Mapa do Google Maps</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Organizador */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center mb-4">
+                <Building2 className="text-purple-600 mr-3" size={24} />
+                <h3 className="text-xl font-bold text-gray-900">Organizador</h3>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
+                  <Building2 className="text-purple-600" size={24} />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-bold text-gray-900">{tournament.mainClub}</h4>
+                  <p className="text-gray-600">Clube de Padel</p>
+                </div>
+                <div className="flex space-x-2">
+                  <button className="p-2 bg-pink-100 text-pink-600 rounded-lg hover:bg-pink-200">
+                    <Instagram size={20} />
+                  </button>
+                  <button className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200">
+                    <Phone size={20} />
+                  </button>
+                  <button className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200">
+                    <Mail size={20} />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
+        );
+      case 'contato':
+        return (
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Informações de Contato</h3>
+            <div className="space-y-4">
+              <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+                <Phone className="text-green-600 mr-4" size={24} />
+                <div>
+                  <p className="font-semibold text-gray-900">Telefone</p>
+                  <p className="text-gray-600">(11) 9999-9999</p>
+                </div>
+              </div>
+              <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+                <Mail className="text-blue-600 mr-4" size={24} />
+                <div>
+                  <p className="font-semibold text-gray-900">E-mail</p>
+                  <p className="text-gray-600">contato@clube.com</p>
+                </div>
+              </div>
+              <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+                <Instagram className="text-pink-600 mr-4" size={24} />
+                <div>
+                  <p className="font-semibold text-gray-900">Instagram</p>
+                  <p className="text-gray-600">@clubepadel</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      case 'localizacao':
+        return (
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Localização</h3>
+            <div className="space-y-6">
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">Endereço</h4>
+                <p className="text-gray-700">
+                  Rua das Quadras, 123<br />
+                  Bairro Esportivo<br />
+                  São Paulo - SP, 01234-567
+                </p>
+              </div>
+              <div className="bg-gray-200 rounded-lg h-64 flex items-center justify-center">
+                <p className="text-gray-600">Mapa Interativo do Google Maps</p>
+              </div>
+              <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 flex items-center justify-center">
+                <Navigation className="mr-2" size={20} />
+                Abrir no Google Maps
+              </button>
+            </div>
+          </div>
+        );
+      case 'regras':
+        return (
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Regras do Torneio</h3>
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">Formato</h4>
+                <p className="text-gray-700">Fase de grupos seguida de mata-mata</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">Pontuação</h4>
+                <p className="text-gray-700">Melhor de 3 sets, com tie-break no terceiro set</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">Equipamentos</h4>
+                <p className="text-gray-700">Raquetes e bolas fornecidas pelo clube</p>
+              </div>
+            </div>
+          </div>
+        );
+      case 'faq':
+        return (
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Perguntas Frequentes</h3>
+            <div className="space-y-4">
+              <div className="border border-gray-200 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-900 mb-2">Como me inscrevo?</h4>
+                <p className="text-gray-700">Clique no botão "Inscreva-se" e preencha o formulário.</p>
+              </div>
+              <div className="border border-gray-200 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-900 mb-2">Posso cancelar minha inscrição?</h4>
+                <p className="text-gray-700">Sim, até 48 horas antes do início do torneio.</p>
+              </div>
+              <div className="border border-gray-200 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-900 mb-2">Preciso levar equipamentos?</h4>
+                <p className="text-gray-700">Não, raquetes e bolas são fornecidas pelo clube.</p>
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const renderInscritos = () => (
+    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+      <h3 className="text-xl font-bold text-gray-900 mb-6">Lista de Inscritos</h3>
+      <div className="space-y-4">
+        {tournament.categories?.map((category: string, index: number) => (
+          <div key={index} className="border border-gray-200 rounded-lg p-4">
+            <h4 className="font-semibold text-gray-900 mb-3">{category}</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className="flex items-center p-2 bg-gray-50 rounded">
+                <span className="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">1</span>
+                <span>João Silva / Pedro Santos</span>
+              </div>
+              <div className="flex items-center p-2 bg-gray-50 rounded">
+                <span className="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">2</span>
+                <span>Maria Costa / Ana Lima</span>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
 
-  const renderLiveTab = () => (
+  const renderGrupos = () => (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-dark-800">Transmissão Ao Vivo</h2>
-        <p className="text-dark-600">Assista aos jogos em tempo real</p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {mockGroups.map((group, index) => (
+          <div key={index} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4">
+              <h3 className="text-lg font-bold">{group.name}</h3>
+            </div>
+            
+            <div className="p-4">
+              <div className="mb-4">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-2 font-semibold text-gray-700">Dupla</th>
+                      <th className="text-center py-2 font-semibold text-gray-700">V</th>
+                      <th className="text-center py-2 font-semibold text-gray-700">S.Games</th>
+                      <th className="text-center py-2 font-semibold text-gray-700">G.Pro</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {group.teams.map((team, teamIndex) => (
+                      <tr key={teamIndex} className={`${
+                        team.position === 1 ? 'bg-green-50' : 
+                        team.position === 2 ? 'bg-green-25' : 
+                        'bg-red-25'
+                      }`}>
+                        <td className="py-2">
+                          <div className="flex items-center">
+                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mr-2 ${
+                              team.position === 1 ? 'bg-green-500 text-white' : 
+                              team.position === 2 ? 'bg-green-400 text-white' : 
+                              'bg-red-400 text-white'
+                            }`}>
+                              {team.position}
+                            </span>
+                            <span className="text-xs font-medium">{team.name}</span>
+                          </div>
+                        </td>
+                        <td className="text-center py-2 font-semibold">{team.wins}</td>
+                        <td className="text-center py-2 text-blue-600 font-semibold">
+                          +{team.gamesFor - team.gamesAgainst}
+                        </td>
+                        <td className="text-center py-2 font-semibold">{team.gamesFor}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2 text-sm">Jogos</h4>
+                <div className="space-y-2">
+                  {group.matches.map((match, matchIndex) => (
+                    <div key={matchIndex} className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex flex-col space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="text-xs font-medium text-gray-900 mb-1">
+                              {match.team1}
+                            </div>
+                            <div className="text-xs font-medium text-gray-900">
+                              {match.team2}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="text-center">
+                              <div className="text-sm font-bold text-purple-600">
+                                {match.status === 'completed' ? match.score : 'vs'}
+                              </div>
+                            </div>
+                            {isCreator && (
+                              <button
+                                onClick={() => handleEditScore(match)}
+                                className="p-1 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded"
+                                title="Editar placar"
+                              >
+                                <Edit2 size={14} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          12/07/2025 • 10:30 • Quadra 2
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderJogos = () => (
+    <div className="space-y-4">
+      {mockMatches.map((match, index) => (
+        <div key={index} className="bg-white rounded-xl shadow-lg p-4 border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-2">
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                match.status === 'Finalizado' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+              }`}>
+                {match.id}
+              </span>
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                match.status === 'Finalizado' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+              }`}>
+                {match.status}
+              </span>
+            </div>
+            {isCreator && (
+              <button
+                onClick={() => handleEditScore(match)}
+                className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg"
+                title="Editar placar"
+              >
+                <Edit2 size={16} />
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-center flex-1">
+              <div className="font-semibold text-gray-900">{match.team1}</div>
+            </div>
+            <div className="mx-4 text-center">
+              <div className="text-lg font-bold text-purple-600">
+                {match.score}
+              </div>
+            </div>
+            <div className="text-center flex-1">
+              <div className="font-semibold text-gray-900">{match.team2}</div>
+            </div>
+          </div>
+
+          <div className="text-sm text-gray-600 text-left">
+            {match.court} • {match.date} • {match.time} • {match.category} • {match.group}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderAgenda = () => (
+    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+      <h3 className="text-xl font-bold text-gray-900 mb-6">Agenda do Torneio</h3>
+      <div className="space-y-4">
+        <div className="border-l-4 border-purple-600 pl-4 py-2">
+          <h4 className="font-semibold text-gray-900">11/07/2025 - Dia 1</h4>
+          <p className="text-gray-600">Fase de grupos - Manhã</p>
+          <p className="text-sm text-gray-500">08:00 - 12:00</p>
+        </div>
+        <div className="border-l-4 border-purple-600 pl-4 py-2">
+          <h4 className="font-semibold text-gray-900">11/07/2025 - Dia 1</h4>
+          <p className="text-gray-600">Fase de grupos - Tarde</p>
+          <p className="text-sm text-gray-500">14:00 - 18:00</p>
+        </div>
+        <div className="border-l-4 border-green-600 pl-4 py-2">
+          <h4 className="font-semibold text-gray-900">12/07/2025 - Dia 2</h4>
+          <p className="text-gray-600">Finais</p>
+          <p className="text-sm text-gray-500">09:00 - 16:00</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderResultados = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Campeões</h2>
+        <p className="text-gray-600">Resultados finais do torneio</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {mockChampions.map((result, index) => (
+          <div key={index} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4">
+              <h3 className="text-lg font-bold">{result.category}</h3>
+            </div>
+            
+            <div className="p-6">
+              {/* Campeão */}
+              <div className="text-center mb-6">
+                <div className="flex items-center justify-center mb-3">
+                  <Crown className="text-yellow-500 mr-2" size={32} />
+                  <span className="text-2xl">🏆</span>
+                </div>
+                <h4 className="text-xl font-bold text-gray-900 mb-1">CAMPEÕES</h4>
+                <p className="text-lg font-semibold text-purple-600">{result.champion}</p>
+              </div>
+
+              {/* Placar da Final */}
+              <div className="text-center mb-6 p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600 mb-1">Placar da Final</p>
+                <p className="text-xl font-bold text-gray-900">{result.finalScore}</p>
+              </div>
+
+              {/* Vice-campeão */}
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Medal className="text-gray-400 mr-2" size={24} />
+                  <span className="text-lg">🥈</span>
+                </div>
+                <h4 className="text-lg font-semibold text-gray-700 mb-1">Vice-campeões</h4>
+                <p className="text-gray-600">{result.runnerUp}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderAoVivo = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Transmissões Ao Vivo</h2>
+        <p className="text-gray-600">Acompanhe os jogos em tempo real</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {tournament.courts.map((court, index) => {
-          const isLive = index < 2; // Mock: first 2 courts are live
-          const currentMatch = matches.find(m => m.court === court && m.status === 'scheduled');
-          
-          return (
-            <div key={court} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-              <div className="relative">
-                <div className="bg-gradient-to-br from-primary-900 to-primary-700 h-32 flex items-center justify-center">
-                  <Video size={48} className="text-white opacity-50" />
-                </div>
-                {isLive && (
-                  <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold animate-pulse">
+        {mockCourts.map((court, index) => (
+          <div key={index} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="relative">
+              <div className="bg-gradient-to-br from-gray-800 to-gray-900 h-32 flex items-center justify-center">
+                <Play className="text-white" size={48} />
+              </div>
+              {court.status === 'Ao Vivo' && (
+                <div className="absolute top-2 right-2">
+                  <span className="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold animate-pulse flex items-center">
+                    <div className="w-2 h-2 bg-white rounded-full mr-1"></div>
                     AO VIVO
-                  </div>
-                )}
-              </div>
-              
-              <div className="p-4">
-                <h3 className="text-lg font-bold text-dark-800 mb-2">{court}</h3>
-                
-                {currentMatch ? (
-                  <div className="mb-4">
-                    <div className="text-sm text-dark-600 mb-1">Agora:</div>
-                    <div className="font-semibold text-dark-900 text-sm">
-                      {currentMatch.team1} vs {currentMatch.team2}
-                    </div>
-                    <div className="text-xs text-dark-500">
-                      {currentMatch.category} • {currentMatch.time}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="mb-4">
-                    <div className="text-sm text-dark-500">Próximo jogo em breve</div>
-                  </div>
-                )}
-                
-                <button 
-                  className={`w-full py-3 rounded-lg font-semibold transition-all flex items-center justify-center ${
-                    isLive 
-                      ? 'bg-red-500 text-white hover:bg-red-600' 
-                      : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                  }`}
-                  disabled={!isLive}
-                >
-                  <Play size={18} className="mr-2" />
-                  {isLive ? 'Assistir Ao Vivo' : 'Transmissão Indisponível'}
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-
-  const renderResultsTab = () => {
-    // Mock results data
-    const results = [
-      {
-        category: 'Open Masculina',
-        champion: { team: 'João Silva / Pedro Santos', score: '6-4, 6-3' },
-        runnerUp: { team: 'Carlos Lima / Rafael Dias', score: '4-6, 3-6' }
-      },
-      {
-        category: 'Open Feminina',
-        champion: { team: 'Maria Costa / Ana Lima', score: '6-2, 6-1' },
-        runnerUp: { team: 'Julia Rocha / Camila Souza', score: '2-6, 1-6' }
-      },
-      {
-        category: '2ª Masculina',
-        champion: { team: 'Bruno Alves / Diego Santos', score: '7-5, 6-4' },
-        runnerUp: { team: 'Lucas Ferreira / Thiago Costa', score: '5-7, 4-6' }
-      }
-    ];
-
-    return (
-      <div className="space-y-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-dark-800">Resultados</h2>
-            <p className="text-dark-600">Campeões e vice-campeões por categoria</p>
-          </div>
-          
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400" size={18} />
-            <input
-              type="text"
-              placeholder="Buscar por nome do atleta..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {results
-            .filter(result => 
-              searchTerm === '' ||
-              result.champion.team.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              result.runnerUp.team.toLowerCase().includes(searchTerm.toLowerCase())
-            )
-            .map((result, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-                <div className="bg-gradient-to-r from-primary-900 to-primary-700 text-white px-6 py-4">
-                  <h3 className="text-lg font-bold">{result.category}</h3>
+                  </span>
                 </div>
-                
-                <div className="p-6 space-y-6">
-                  {/* Champion */}
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-3">
-                      <Crown size={32} className="text-yellow-500 mr-2" />
-                      <span className="text-lg font-bold text-yellow-600">CAMPEÃO</span>
-                    </div>
-                    <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
-                      <h4 className="text-xl font-bold text-dark-900 mb-2">
-                        {result.champion.team}
-                      </h4>
-                      <div className="text-lg font-semibold text-yellow-700">
-                        Final: {result.champion.score}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Runner-up */}
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-3">
-                      <Medal size={24} className="text-gray-400 mr-2" />
-                      <span className="text-md font-semibold text-gray-600">VICE-CAMPEÃO</span>
-                    </div>
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                      <h4 className="text-lg font-semibold text-dark-800 mb-1">
-                        {result.runnerUp.team}
-                      </h4>
-                      <div className="text-sm text-gray-600">
-                        Final: {result.runnerUp.score}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-        </div>
-
-        {results.filter(result => 
-          searchTerm === '' ||
-          result.champion.team.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          result.runnerUp.team.toLowerCase().includes(searchTerm.toLowerCase())
-        ).length === 0 && (
-          <div className="text-center py-12">
-            <Award size={64} className="text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-dark-900 mb-2">Nenhum resultado encontrado</h3>
-            <p className="text-dark-500">
-              Tente ajustar o termo de busca.
-            </p>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderInfoTab = () => (
-    <div className="space-y-4">
-      {/* Sub-navigation */}
-      <div className="border-b border-gray-200">
-        <nav className="flex space-x-8">
-          {[
-            { id: 'geral', label: 'Gerais' },
-            { id: 'contato', label: 'Contato' },
-            { id: 'localizacao', label: 'Localização' },
-            { id: 'regras', label: 'Regras' },
-            { id: 'faq', label: 'FAQ' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveSubTab(tab.id)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeSubTab === tab.id
-                  ? 'border-primary-600 text-primary-600'
-                  : 'border-transparent text-dark-500 hover:text-dark-700 hover:border-gray-300'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {activeSubTab === 'geral' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center mb-4">
-              <Calendar className="text-primary-600 mr-3" size={24} />
-              <h3 className="text-lg font-bold text-dark-800">Datas do Torneio</h3>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-dark-600">Início:</span>
-                <span className="font-semibold text-dark-900">
-                  {new Date(tournament.startDate).toLocaleDateString('pt-BR')}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-dark-600">Fim:</span>
-                <span className="font-semibold text-dark-900">
-                  {new Date(tournament.endDate).toLocaleDateString('pt-BR')}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center mb-4">
-              <DollarSign className="text-accent-600 mr-3" size={24} />
-              <h3 className="text-lg font-bold text-dark-800">Informações de Inscrição</h3>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-dark-600">Taxa:</span>
-                <span className="font-semibold text-accent-600">
-                  R$ {tournament.registrationFee.toFixed(2)}
-                </span>
-              </div>
-              {hasParticipantLimit && (
-                <>
-                  <div className="flex justify-between">
-                    <span className="text-dark-600">Vagas:</span>
-                    <span className="font-semibold text-dark-900">{realTournamentData.maxParticipants}</span>
-                  </div>
-                  <div className="mt-4">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-dark-600">Ocupação</span>
-                      <span className="text-dark-600">
-                        {Math.round((participants.length / realTournamentData.maxParticipants) * 100)}% ocupado
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-accent-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${Math.min((participants.length / realTournamentData.maxParticipants) * 100, 100)}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </>
               )}
             </div>
+            
+            <div className="p-4">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{court.name}</h3>
+              
+              {court.match ? (
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 mb-1">Jogo atual:</p>
+                  <p className="font-medium text-gray-900">{court.match}</p>
+                </div>
+              ) : (
+                <p className="text-gray-500 mb-4">Nenhum jogo agendado</p>
+              )}
+
+              <div className="flex items-center justify-between">
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  court.status === 'Ao Vivo' ? 'bg-red-100 text-red-800' :
+                  court.status === 'Próximo' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {court.status}
+                </span>
+                
+                {court.streamUrl && (
+                  <button className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 flex items-center text-sm">
+                    <Play className="mr-1" size={14} />
+                    Assistir
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      )}
-
-      {activeSubTab === 'contato' && (
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <h3 className="text-lg font-bold text-dark-800 mb-4">Informações de Contato</h3>
-          <p className="text-dark-600">Informações de contato serão exibidas aqui.</p>
-        </div>
-      )}
-
-      {activeSubTab === 'localizacao' && (
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <h3 className="text-lg font-bold text-dark-800 mb-4">Localização</h3>
-          <p className="text-dark-600">Mapa e informações de localização serão exibidas aqui.</p>
-        </div>
-      )}
-
-      {activeSubTab === 'regras' && (
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <h3 className="text-lg font-bold text-dark-800 mb-4">Regras do Torneio</h3>
-          <p className="text-dark-600">Regras específicas do torneio serão exibidas aqui.</p>
-        </div>
-      )}
-
-      {activeSubTab === 'faq' && (
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <h3 className="text-lg font-bold text-dark-800 mb-4">Perguntas Frequentes</h3>
-          <p className="text-dark-600">FAQ será exibido aqui.</p>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   );
 
-  const tabs = [
-    { id: 'info', label: 'Informações', icon: Info },
-    { id: 'inscritos', label: 'Inscritos', icon: Users },
-    { id: 'grupos', label: 'Grupos', icon: Trophy },
-    { id: 'jogos', label: 'Jogos', icon: Play },
-    { id: 'ao-vivo', label: 'Ao Vivo', icon: Zap },
-    { id: 'resultados', label: 'Resultados', icon: Award }
-  ];
-
   return (
-    <div className="min-h-screen bg-light">
+    <div className="min-h-screen bg-gray-50">
       {user ? <DashboardHeader /> : <Navbar />}
       
-      <div className="pt-16">
-        {/* Hero Section */}
-        <div className="bg-gradient-to-br from-primary-900 via-primary-800 to-dark-900 py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex-1">
-                <h1 className="text-4xl md:text-5xl font-black text-white mb-3">
-                  {tournament.name}
-                </h1>
-                <div className="flex flex-wrap items-center gap-4 text-white">
+      {/* Hero Banner */}
+      <div className="relative h-64 md:h-80 bg-gradient-to-br from-purple-900 via-purple-800 to-purple-700 overflow-hidden">
+        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-900/50 to-transparent"></div>
+        
+        <div className="relative h-full flex items-center">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div className="text-white mb-6 md:mb-0">
+                <h1 className="text-3xl md:text-4xl font-bold mb-2">{tournament.name}</h1>
+                <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-6 text-lg">
                   <div className="flex items-center">
-                    <span className="font-medium">{tournament.club}</span>
+                    <MapPin className="mr-2" size={20} />
+                    <span>{tournament.mainClub}</span>
                   </div>
                   <div className="flex items-center">
-                    <MapPin size={20} className="mr-2" />
-                    <span>{tournament.location.city}, {tournament.location.state}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Calendar size={20} className="mr-2" />
+                    <Calendar className="mr-2" size={20} />
                     <span>{new Date(tournament.startDate).toLocaleDateString('pt-BR')}</span>
                   </div>
                 </div>
               </div>
               
-              <div className="mt-4 lg:mt-0">
-                {isCreator ? (
-                  <button className="bg-accent-500 text-dark-900 px-4 py-2 rounded-lg font-semibold hover:bg-accent-400 transition-all duration-300 shadow-lg flex items-center">
-                    <Edit2 size={18} className="mr-2" />
+              <div className="flex items-center space-x-4">
+                {isCreator && (
+                  <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center">
+                    <Edit2 className="mr-2" size={16} />
                     Editar
                   </button>
-                ) : isAthlete ? (
-                  <button className="bg-accent-500 text-dark-900 px-4 py-2 rounded-lg font-semibold hover:bg-accent-400 transition-all duration-300 shadow-lg flex items-center">
-                    <Zap size={18} className="mr-2" />
-                    Inscrever-se
-                  </button>
-                ) : !user ? (
-                  <button className="bg-accent-500 text-dark-900 px-4 py-2 rounded-lg font-semibold hover:bg-accent-400 transition-all duration-300 shadow-lg flex items-center">
-                    <Zap size={18} className="mr-2" />
-                    Inscrever-se
-                  </button>
-                ) : null}
+                )}
+                <button className="bg-gradient-to-r from-green-600 to-green-500 text-white px-6 py-3 rounded-lg hover:from-green-500 hover:to-green-400 font-bold text-lg shadow-lg">
+                  <Zap className="mr-2" size={20} />
+                  Inscreva-se
+                </button>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Navigation Tabs */}
-        <div className="bg-white border-b border-gray-200 sticky top-16 z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <nav className="flex space-x-8 overflow-x-auto">
-              {tabs.map(tab => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                      activeTab === tab.id
-                        ? 'border-primary-600 text-primary-600'
-                        : 'border-transparent text-dark-500 hover:text-dark-700 hover:border-gray-300'
-                    }`}
-                  >
-                    <Icon size={18} className="mr-2" />
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </nav>
+      {/* Navigation Tabs */}
+      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-16 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex overflow-x-auto">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center px-4 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                    activeTab === tab.id
+                      ? 'border-purple-600 text-purple-600'
+                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                  }`}
+                >
+                  <Icon className="mr-2" size={16} />
+                  {tab.name}
+                </button>
+              );
+            })}
           </div>
-        </div>
-
-        {/* Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          {activeTab === 'info' && renderInfoTab()}
-          {activeTab === 'inscritos' && renderParticipantsTab()}
-          {activeTab === 'grupos' && renderGroupsTab()}
-          {activeTab === 'jogos' && renderMatchesTab()}
-          {activeTab === 'ao-vivo' && renderLiveTab()}
-          {activeTab === 'resultados' && renderResultsTab()}
         </div>
       </div>
 
-      <AIParticipantsModal
-        isOpen={showAIModal}
-        onClose={() => setShowAIModal(false)}
-        categories={tournament.categories}
-        onConfirm={generateAIParticipants}
-      />
+      {/* Sub Navigation for Informações */}
+      {activeTab === 'informacoes' && (
+        <div className="bg-gray-50 border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex overflow-x-auto">
+              {subTabs.map((subTab) => (
+                <button
+                  key={subTab.id}
+                  onClick={() => setActiveSubTab(subTab.id)}
+                  className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                    activeSubTab === subTab.id
+                      ? 'border-purple-600 text-purple-600 bg-white'
+                      : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {subTab.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
-      <ScoreModal
-        isOpen={showScoreModal}
-        onClose={() => setShowScoreModal(false)}
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Main Content Area */}
+          <div className="flex-1">
+            {renderContent()}
+          </div>
+
+          {/* Sidebar */}
+          <div className="lg:w-80">
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 sticky top-32">
+              {/* Club Info */}
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Building2 className="text-purple-600" size={24} />
+                </div>
+                <h3 className="font-bold text-gray-900">{tournament.mainClub}</h3>
+                <p className="text-gray-600 text-sm">Organizador</p>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="text-center p-3 bg-purple-50 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">{tournament.categories?.length || 0}</div>
+                  <div className="text-xs text-gray-600">Categorias</div>
+                </div>
+                <div className="text-center p-3 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">R$ {tournament.registrationFee?.toFixed(2)}</div>
+                  <div className="text-xs text-gray-600">Inscrição</div>
+                </div>
+              </div>
+
+              {/* Contact Buttons */}
+              <div className="space-y-3 mb-6">
+                <button className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 flex items-center justify-center">
+                  <Phone className="mr-2" size={16} />
+                  WhatsApp
+                </button>
+                <button className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center">
+                  <Mail className="mr-2" size={16} />
+                  E-mail
+                </button>
+                <button className="w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 flex items-center justify-center">
+                  <Instagram className="mr-2" size={16} />
+                  Instagram
+                </button>
+              </div>
+
+              {/* Mini Map */}
+              <div className="mb-6">
+                <h4 className="font-semibold text-gray-900 mb-2">Localização</h4>
+                <div className="bg-gray-200 rounded-lg h-32 flex items-center justify-center">
+                  <MapPin className="text-gray-500" size={24} />
+                </div>
+              </div>
+
+              {/* Mini Calendar */}
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">Data do Evento</h4>
+                <div className="bg-purple-50 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {new Date(tournament.startDate).getDate()}
+                  </div>
+                  <div className="text-sm text-purple-600">
+                    {new Date(tournament.startDate).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Score Edit Modal */}
+      <ScoreEditModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
         match={selectedMatch}
         onSave={handleSaveScore}
       />
