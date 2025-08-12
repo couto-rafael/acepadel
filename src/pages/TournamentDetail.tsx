@@ -1298,13 +1298,13 @@ const TournamentDetail: React.FC = () => {
                   </div>
                   <div className="flex items-center">
                     <Calendar className="mr-2" size={20} />
-                    <span>
-                      {new Date(tournament.startDate).toLocaleDateString('pt-BR', { 
-                        day: 'numeric', 
-                        month: 'long' 
-                      }).replace(' de ', ' ')}/{new Date(tournament.startDate).getFullYear().toString().slice(-2)} - {new Date(tournament.endDate).toLocaleDateString('pt-BR', { 
-                        day: 'numeric', 
-                        month: 'long' 
+                    {new Date(tournament.startDate).toLocaleDateString('pt-BR', {
+                      day: 'numeric',
+                      month: 'long'
+                    }).replace(' de ', ' ')} - {new Date(tournament.endDate).toLocaleDateString('pt-BR', {
+                      day: 'numeric',
+                      month: 'long'
+                    }).replace(' de ', ' ')}
                       }).replace(' de ', ' ')}/{new Date(tournament.endDate).getFullYear().toString().slice(-2)}
                     </span>
                   </div>
