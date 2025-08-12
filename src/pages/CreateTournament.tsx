@@ -251,8 +251,10 @@ const CreateTournament: React.FC = () => {
       maxParticipants: 64, // Default value
       createdAt: new Date().toISOString(),
       // Add location data for the tournaments page
-      city: profile?.city || 'São Paulo',
-      state: profile?.state || 'SP'
+      location: {
+        city: profile?.city || 'São Paulo',
+        state: profile?.state || 'SP'
+      }
     };
     
     const updatedTournaments = [...existingTournaments, newTournament];

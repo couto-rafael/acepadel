@@ -112,8 +112,8 @@ export const getClubTournaments = (): Tournament[] => {
     name: tournament.name,
     club: tournament.mainClub || 'Clube',
     location: {
-      city: tournament.city || 'São Paulo',
-      state: tournament.state || 'SP'
+      city: tournament.location?.city || tournament.city || 'São Paulo',
+      state: tournament.location?.state || tournament.state || 'SP'
     },
     date: tournament.startDate,
     status: tournament.status === 'scheduled' ? 'open' : tournament.status,
