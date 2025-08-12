@@ -307,6 +307,11 @@ const TournamentDetail: React.FC = () => {
         title: tournament.name,
         text: `Confira este torneio de padel: ${tournament.name}`,
         url: window.location.href
+      // Ensure location object exists with default values
+      if (!foundTournament.location || typeof foundTournament.location !== 'object') {
+        foundTournament.location = { city: 'São Paulo', state: 'SP' };
+      }
+      
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
@@ -1294,7 +1299,7 @@ const TournamentDetail: React.FC = () => {
                   </div>
                   <div className="flex items-center">
                     <Navigation className="mr-2" size={20} />
-                    <span>Sao Paulo/SP</span>
+                    <span>{tournament.location?.city || 'São Paulo'}/{tournament.location?.state || 'SP'}</span>
                   </div>
                   <div className="flex items-center">
                     <span>{tournament.location.city.replace('ã', 'a')}/{tournament.location.state}</span>
