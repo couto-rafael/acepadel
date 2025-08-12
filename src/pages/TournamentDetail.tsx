@@ -377,6 +377,8 @@ const TournamentDetail: React.FC = () => {
                       </button>
                     ) : null}
                   </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
