@@ -398,10 +398,10 @@ const TournamentDetail: React.FC = () => {
   ];
 
   const mockRegistrations = [
-    { id: '1', category: 'Open Masculina', player1: { name: 'João Silva', city: 'São Paulo, SP', avatar: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg' }, player2: { name: 'Pedro Santos', city: 'Rio de Janeiro, RJ', avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg' } },
-    { id: '2', category: 'Open Masculina', player1: { name: 'Carlos Lima', city: 'Belo Horizonte, MG', avatar: 'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg' }, player2: { name: 'Rafael Dias', city: 'Salvador, BA', avatar: 'https://images.pexels.com/photos/1212984/pexels-photo-1212984.jpeg' } },
-    { id: '3', category: 'Open Feminina', player1: { name: 'Maria Costa', city: 'São Paulo, SP', avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg' }, player2: { name: 'Ana Lima', city: 'Campinas, SP', avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg' } },
-    { id: '4', category: 'Open Feminina', player1: { name: 'Julia Rocha', city: 'Curitiba, PR', avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg' }, player2: { name: 'Camila Souza', city: 'Porto Alegre, RS', avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg' } }
+    { id: '1', category: 'Open Masculina', player1: { name: 'João Silva', city: 'São Paulo, SP', avatar: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg' }, player2: { name: 'Pedro Santos', city: 'Rio de Janeiro, RJ', avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg' }, paymentStatus: 'confirmed' },
+    { id: '2', category: 'Open Masculina', player1: { name: 'Carlos Lima', city: 'Belo Horizonte, MG', avatar: 'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg' }, player2: { name: 'Rafael Dias', city: 'Salvador, BA', avatar: 'https://images.pexels.com/photos/1212984/pexels-photo-1212984.jpeg' }, paymentStatus: 'pending' },
+    { id: '3', category: 'Open Feminina', player1: { name: 'Maria Costa', city: 'São Paulo, SP', avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg' }, player2: { name: 'Ana Lima', city: 'Campinas, SP', avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg' }, paymentStatus: 'confirmed' },
+    { id: '4', category: 'Open Feminina', player1: { name: 'Julia Rocha', city: 'Curitiba, PR', avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg' }, player2: { name: 'Camila Souza', city: 'Porto Alegre, RS', avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg' }, paymentStatus: 'confirmed' }
   ];
 
   const mockMatches = [
@@ -894,35 +894,87 @@ const TournamentDetail: React.FC = () => {
             <div key={category} className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
               <h3 className="text-lg font-bold text-gray-900 mb-4">{category}</h3>
               <div className="space-y-3">
-                {registrations.map((reg, index) => (
-                  <div key={reg.id} className="flex items-center p-4 bg-gray-50 rounded-lg">
-                    <span className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-4">
-                      {index + 1}
-                    </span>
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="flex items-center">
-                        <img
-                          src={reg.player1.avatar}
-                          alt={reg.player1.name}
-                          className="w-10 h-10 rounded-full object-cover mr-3"
-                        />
-                        <div>
-                          <p className="font-semibold text-gray-900">{reg.player1.name}</p>
-                          <p className="text-sm text-gray-600">{reg.player1.city}</p>
+                {registrations.map((registration, index) => (
+                  <div key={registration.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-4">
+                      <span className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        {index + 1}
+                      </span>
+                      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex items-center">
+                          <img
+                            src={registration.player1.avatar}
+                            alt={registration.player1.name}
+                            className="w-10 h-10 rounded-full object-cover mr-3"
+                          />
+                          <div>
+                            <p className="font-semibold text-gray-900">{registration.player1.name}</p>
+                            <p className="text-sm text-gray-600">{registration.player1.city}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center">
+                          <img
+                            src={registration.player2.avatar}
+                            alt={registration.player2.name}
+                            className="w-10 h-10 rounded-full object-cover mr-3"
+                          />
+                          <div>
+                            <p className="font-semibold text-gray-900">{registration.player2.name}</p>
+                            <p className="text-sm text-gray-600">{registration.player2.city}</p>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center">
-                        <img
-                          src={reg.player2.avatar}
-                          alt={reg.player2.name}
-                          className="w-10 h-10 rounded-full object-cover mr-3"
-                        />
-                        <div>
-                          <p className="font-semibold text-gray-900">{reg.player2.name}</p>
-                          <p className="text-sm text-gray-600">{reg.player2.city}</p>
-                        </div>
+                      <div className="flex items-center mt-1">
+                        {registration.paymentStatus === 'confirmed' ? (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <Check size={12} className="mr-1" />
+                            Confirmado
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            <Clock size={12} className="mr-1" />
+                            Aguardando Pagamento
+                          </span>
+                        )}
                       </div>
                     </div>
+                    {isCreator && (
+                      <div className="flex items-center space-x-2">
+                        {registration.paymentStatus === 'pending' && (
+                          <button
+                            onClick={() => {
+                              // Handle confirm payment
+                              console.log('Confirmar pagamento da dupla:', registration.id);
+                            }}
+                            className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
+                            title="Confirmar pagamento"
+                          >
+                            <Check size={18} />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            // Handle edit team
+                            console.log('Editar dupla:', registration.id);
+                          }}
+                          className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Editar dupla"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm('Tem certeza que deseja remover esta dupla?')) {
+                              console.log('Remover dupla:', registration.id);
+                            }
+                          }}
+                          className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Remover dupla"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1037,58 +1089,17 @@ const TournamentDetail: React.FC = () => {
                                 <div className="text-sm font-bold text-purple-600">
                                   {match.status === 'completed' ? match.score : 'vs'}
                                 </div>
-                        <div key={registration.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                          <div className="flex items-center space-x-4">
+                              </div>
+                              {isCreator && (
+                                <button
+                                  onClick={() => handleEditScore(match)}
+                                  className="p-1 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded"
                                   title="Editar placar"
                                 >
                                   <Edit2 size={14} />
                                 </button>
                               )}
-                              <div className="flex items-center mt-1">
-                                {registration.paymentStatus === 'confirmed' ? (
-                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    <Check size={12} className="mr-1" />
-                                    Confirmado
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                    <Clock size={12} className="mr-1" />
-                                    Aguardando Pagamento
-                                  </span>
-                          <div className="flex items-center space-x-2">
-                            {registration.paymentStatus === 'pending' && (
-                              <button
-                                onClick={() => {
-                                  // Handle confirm payment
-                                  console.log('Confirmar pagamento da dupla:', registration.id);
-                                }}
-                                className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
-                                title="Confirmar pagamento"
-                              >
-                                <Check size={18} />
-                              </button>
-                            )}
-                            <button
-                              onClick={() => {
-                                // Handle edit team
-                                console.log('Editar dupla:', registration.id);
-                              }}
-                              className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
-                              title="Editar dupla"
-                            >
-                              <Edit2 size={18} />
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (confirm('Tem certeza que deseja remover esta dupla?')) {
-                                  console.log('Remover dupla:', registration.id);
-                                }
-                              }}
-                              className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Remover dupla"
-                            >
-                              <Trash2 size={18} />
-                            </button>
+                            </div>
                           </div>
                         </div>
                       </div>
