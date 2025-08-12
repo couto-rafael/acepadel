@@ -1297,15 +1297,18 @@ const TournamentDetail: React.FC = () => {
                     <span>Sao Paulo/SP</span>
                   </div>
                   <div className="flex items-center">
+                    <span>{tournament.location.city.replace('ã', 'a')}/{tournament.location.state}</span>
+                  </div>
+                  <div className="flex items-center">
                     <Calendar className="mr-2" size={20} />
-                    {new Date(tournament.startDate).toLocaleDateString('pt-BR', {
-                      day: 'numeric',
-                      month: 'long'
-                    }).replace(' de ', ' ')} - {new Date(tournament.endDate).toLocaleDateString('pt-BR', {
-                      day: 'numeric',
-                      month: 'long'
-                    }).replace(' de ', ' ')}
-                      }).replace(' de ', ' ')}/{new Date(tournament.endDate).getFullYear().toString().slice(-2)}
+                    <span>
+                      {new Date(tournament.startDate).toLocaleDateString('pt-BR', {
+                        day: 'numeric',
+                        month: 'long'
+                      }).replace(' de ', ' ')} - {new Date(tournament.endDate).toLocaleDateString('pt-BR', {
+                        day: 'numeric',
+                        month: 'long'
+                      }).replace(' de ', ' ')}
                     </span>
                   </div>
                 </div>
