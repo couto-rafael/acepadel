@@ -280,6 +280,10 @@ const TournamentDetail: React.FC = () => {
       const foundTournament = clubTournaments.find((t: any) => t.id === id);
       
       if (foundTournament) {
+        // Ensure location object exists with default values
+        if (!foundTournament.location || typeof foundTournament.location !== 'object') {
+          foundTournament.location = { city: 'São Paulo', state: 'SP' };
+        }
         setTournament(foundTournament);
       }
       setLoading(false);
@@ -307,12 +311,6 @@ const TournamentDetail: React.FC = () => {
         title: tournament.name,
         text: `Confira este torneio de padel: ${tournament.name}`,
         url: window.location.href,
-      });
-      // Ensure location object exists with default values
-      if (!foundTournament.location || typeof foundTournament.location !== 'object') {
-        foundTournament.location = { city: 'São Paulo', state: 'SP' };
-      }
-      
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
@@ -1301,9 +1299,6 @@ const TournamentDetail: React.FC = () => {
                   <div className="flex items-center">
                     <Navigation className="mr-2" size={20} />
                     <span>{tournament.location?.city || 'São Paulo'}/{tournament.location?.state || 'SP'}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span>{tournament.location.city.replace('ã', 'a')}/{tournament.location.state}</span>
                   </div>
                   <div className="flex items-center">
                     <Calendar className="mr-2" size={20} />
