@@ -334,14 +334,6 @@ const TournamentDetail: React.FC = () => {
                       <Share2 size={20} />
                     </button>
                   </div>
-                  <div className="flex items-center ml-4 space-x-2">
-                    <button className="text-white hover:text-accent-500 transition-colors">
-                      <Heart size={20} />
-                    </button>
-                    <button className="text-white hover:text-accent-500 transition-colors">
-                      <Share2 size={20} />
-                    </button>
-                  </div>
                 </div>
 
                 <h1 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
@@ -362,8 +354,6 @@ const TournamentDetail: React.FC = () => {
                       <Calendar size={18} className="mr-2 text-accent-500" />
                       <span>
                         {new Date(tournament.startDate).toLocaleDateString('pt-BR')} - {new Date(tournament.endDate).toLocaleDateString('pt-BR')}
-                      </span>
-                    </div>
                       </span>
                     </div>
                   </div>
@@ -387,11 +377,6 @@ const TournamentDetail: React.FC = () => {
                       </button>
                     ) : null}
                   </div>
-                    alt={tournament.name}
-                    className="w-32 h-32 rounded-xl object-cover border-4 border-accent-500 shadow-xl"
-                  />
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -419,60 +404,13 @@ const TournamentDetail: React.FC = () => {
               })}
             </nav>
           </div>
-
-                  <div className="flex items-center space-x-3 mt-4 md:mt-0">
-                    {isOwner ? (
-                      <button
-                        onClick={handleEditTournament}
-                        className="bg-gradient-to-r from-accent-500 to-accent-400 text-dark-900 px-6 py-3 rounded-lg hover:from-accent-400 hover:to-accent-300 transition-all duration-300 flex items-center font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                      >
-                        <Edit2 size={18} className="mr-2" />
-                        Editar
-                      </button>
-                    ) : isAthlete && tournament.status === 'open' ? (
-                      <button
-                        onClick={handleRegisterTournament}
-                        className="bg-gradient-to-r from-primary-600 to-primary-500 text-white px-6 py-3 rounded-lg hover:from-primary-500 hover:to-primary-400 transition-all duration-300 flex items-center font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                      >
-                        <UserPlus size={18} className="mr-2" />
-                        Inscrever-se
-                      </button>
-                    ) : null}
-                  </div>
-                </span>
-              </div>
-              <p className="text-gray-300 mb-6 leading-relaxed">
-                A melhor plataforma para encontrar e participar de torneios de padel no Brasil.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-bold mb-6 text-accent-500">Links Rápidos</h3>
-              <ul className="space-y-3">
-                <li><a href="/" className="text-gray-300 hover:text-white transition-colors">Home</a></li>
-                <li><a href="/tournaments" className="text-gray-300 hover:text-white transition-colors">Torneios</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Rankings</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Clubes</a></li>
-                <li><a href="/contact" className="text-gray-300 hover:text-white transition-colors">Contato</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-bold mb-6 text-accent-500">Contato</h3>
-              <p className="text-gray-300 mb-2">contato@acepadel.com.br</p>
-              <p className="text-gray-300 mb-4">(11) 9999-9999</p>
-              <p className="text-gray-300">
-                Av. Paulista, 1000 - Bela Vista<br />
-                São Paulo - SP, 01310-100
-              </p>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-700 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} AcePadel. Todos os direitos reservados.</p>
-          </div>
         </div>
-      </footer>
+
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {renderTabContent()}
+        </div>
+      </div>
     </div>
   );
 };
