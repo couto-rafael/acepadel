@@ -34,7 +34,10 @@ import {
   Plus,
   Eye,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Check,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -1034,20 +1037,58 @@ const TournamentDetail: React.FC = () => {
                                 <div className="text-sm font-bold text-purple-600">
                                   {match.status === 'completed' ? match.score : 'vs'}
                                 </div>
-                              </div>
-                              {isCreator && (
-                                <button
-                                  onClick={() => handleEditScore(match)}
-                                  className="p-1 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded"
+                        <div key={registration.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                          <div className="flex items-center space-x-4">
                                   title="Editar placar"
                                 >
                                   <Edit2 size={14} />
                                 </button>
                               )}
-                            </div>
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            12/07/2025 • 10:30 • Quadra 2
+                              <div className="flex items-center mt-1">
+                                {registration.paymentStatus === 'confirmed' ? (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <Check size={12} className="mr-1" />
+                                    Confirmado
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    <Clock size={12} className="mr-1" />
+                                    Aguardando Pagamento
+                                  </span>
+                          <div className="flex items-center space-x-2">
+                            {registration.paymentStatus === 'pending' && (
+                              <button
+                                onClick={() => {
+                                  // Handle confirm payment
+                                  console.log('Confirmar pagamento da dupla:', registration.id);
+                                }}
+                                className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
+                                title="Confirmar pagamento"
+                              >
+                                <Check size={18} />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => {
+                                // Handle edit team
+                                console.log('Editar dupla:', registration.id);
+                              }}
+                              className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="Editar dupla"
+                            >
+                              <Edit2 size={18} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (confirm('Tem certeza que deseja remover esta dupla?')) {
+                                  console.log('Remover dupla:', registration.id);
+                                }
+                              }}
+                              className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Remover dupla"
+                            >
+                              <Trash2 size={18} />
+                            </button>
                           </div>
                         </div>
                       </div>
