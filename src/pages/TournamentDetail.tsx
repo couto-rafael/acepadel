@@ -1293,8 +1293,19 @@ const TournamentDetail: React.FC = () => {
                     </button>
                   </div>
                   <div className="flex items-center">
+                    <span>{tournament.city || 'São Paulo'}, {tournament.state || 'SP'}</span>
+                  </div>
+                  <div className="flex items-center">
                     <Calendar className="mr-2" size={20} />
-                    <span>{new Date(tournament.startDate).toLocaleDateString('pt-BR')}</span>
+                    <span>
+                      {new Date(tournament.startDate).toLocaleDateString('pt-BR', { 
+                        day: 'numeric', 
+                        month: 'long' 
+                      }).replace(' de ', ' ')}/{new Date(tournament.startDate).getFullYear().toString().slice(-2)} - {new Date(tournament.endDate).toLocaleDateString('pt-BR', { 
+                        day: 'numeric', 
+                        month: 'long' 
+                      }).replace(' de ', ' ')}/{new Date(tournament.endDate).getFullYear().toString().slice(-2)}
+                    </span>
                   </div>
                 </div>
               </div>
