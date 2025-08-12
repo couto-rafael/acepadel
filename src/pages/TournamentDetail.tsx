@@ -69,18 +69,14 @@ const TournamentDetail: React.FC = () => {
         <p className="text-gray-600 text-sm">Organizador</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="space-y-3 mb-6">
         <div className="text-center">
-          <div className="bg-primary-50 rounded-lg p-3">
-            <p className="text-2xl font-bold text-primary-600">4</p>
-            <p className="text-sm text-gray-600">Inscritos</p>
-          </div>
+          <p className="text-2xl font-bold text-primary-600">4</p>
+          <p className="text-sm text-gray-600">Inscritos</p>
         </div>
         <div className="text-center">
-          <div className="bg-green-50 rounded-lg p-3">
-            <p className="text-2xl font-bold text-green-600">R$ 120,00</p>
-            <p className="text-sm text-gray-600">Inscrição</p>
-          </div>
+          <p className="text-2xl font-bold text-green-600">R$ 120,00</p>
+          <p className="text-sm text-gray-600">Inscrição</p>
         </div>
       </div>
 
