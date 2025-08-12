@@ -348,7 +348,6 @@ const TournamentDetail: React.FC = () => {
     { id: 'inscritos', name: 'Inscritos', icon: Users },
     { id: 'grupos', name: 'Grupos', icon: Trophy },
     { id: 'jogos', name: 'Jogos', icon: Calendar },
-
     { id: 'resultados', name: 'Resultados', icon: Medal },
     { id: 'ao-vivo', name: 'Ao Vivo', icon: Play }
   ];
@@ -490,8 +489,6 @@ const TournamentDetail: React.FC = () => {
         return renderGrupos();
       case 'jogos':
         return renderJogos();
-      case 'agenda':
-        return renderAgenda();
       case 'resultados':
         return renderResultados();
       case 'ao-vivo':
@@ -843,7 +840,7 @@ const TournamentDetail: React.FC = () => {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="all">Todas as Categorias</option>
+                <option value="all">Categorias</option>
                 {categories.slice(1).map(category => (
                   <option key={category} value={category}>{category}</option>
                 ))}
@@ -945,7 +942,7 @@ const TournamentDetail: React.FC = () => {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="all">Todas as Categorias</option>
+                <option value="all">Categorias</option>
                 {categories.slice(1).map(category => (
                   <option key={category} value={category}>{category}</option>
                 ))}
@@ -1088,7 +1085,7 @@ const TournamentDetail: React.FC = () => {
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
-              <option value="all">Todas as Categorias</option>
+              <option value="all">Categorias</option>
               {categories.slice(1).map(category => (
                 <option key={category} value={category}>{category}</option>
               ))}
@@ -1151,118 +1148,6 @@ const TournamentDetail: React.FC = () => {
               </div>
             </div>
           ))}
-        </div>
-      </div>
-    );
-  };
-
-  const renderAgenda = () => {
-    const filteredCourts = getFilteredCourts();
-    const categories = ['all', ...Array.from(new Set(mockMatches.map(m => m.category)))];
-    const dates = ['all', ...Array.from(new Set(mockMatches.map(m => m.date)))];
-
-    return (
-      <div className="space-y-6">
-        {/* Filters */}
-        <div className="bg-white rounded-xl shadow-lg p-4 border border-gray-100">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                placeholder="Buscar atleta..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-            </div>
-            <select
-              value={selectedCourt}
-              onChange={(e) => setSelectedCourt(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="all">Todas as Quadras</option>
-              {filteredCourts.map(court => (
-                <option key={court.id} value={court.name}>{court.name}</option>
-              ))}
-            </select>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="all">Todas as Categorias</option>
-              {categories.slice(1).map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
-            <input
-              type="date"
-              value={selectedDate === 'all' ? '' : selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value || 'all')}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
-        </div>
-
-        {/* Courts Grid */}
-        <div className="overflow-x-auto">
-          <div className="flex space-x-6 pb-4" style={{ minWidth: 'max-content' }}>
-            {filteredCourts.map((court, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-lg border border-gray-100 w-80 flex-shrink-0">
-                <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4">
-                  <h3 className="text-lg font-bold">{court.name}</h3>
-                </div>
-                
-                <div className="p-4">
-                  <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
-                    {court.matches.map((match, matchIndex) => (
-                      <div key={matchIndex} className="bg-gray-50 rounded-lg p-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-bold text-purple-600">{match.time}</span>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            match.status === 'completed' ? 'bg-green-100 text-green-800' :
-                            match.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-                            'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {match.status === 'completed' ? 'Finalizado' :
-                             match.status === 'in-progress' ? 'Em Andamento' : 'Agendado'}
-                          </span>
-                        </div>
-                        <div className="text-xs text-gray-700">
-                          {match.teams}
-                        </div>
-                        {isCreator && (
-                          <button
-                            onClick={() => handleEditScore(match)}
-                            className="mt-2 p-1 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded"
-                            title="Editar placar"
-                          >
-                            <Edit2 size={12} />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 text-center text-xs border-t border-gray-200 pt-3">
-                    <div>
-                      <p className="font-semibold text-gray-900">{court.totalGames}</p>
-                      <p className="text-gray-600">Jogos</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">{court.startTime}</p>
-                      <p className="text-gray-600">Início</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">{court.endTime}</p>
-                      <p className="text-gray-600">Fim</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     );
