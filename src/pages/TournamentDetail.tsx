@@ -846,7 +846,7 @@ const TournamentDetail: React.FC = () => {
                 ))}
               </select>
             </div>
-            {isCreator ? (
+            {isCreator && (
               <button
                 onClick={() => setAddTeamModalOpen(true)}
                 className="bg-purple-600 text-white px-4 py-3 rounded-lg hover:bg-purple-700 flex items-center whitespace-nowrap"
@@ -854,15 +854,24 @@ const TournamentDetail: React.FC = () => {
                 <Plus className="mr-2" size={16} />
                 Adicionar Dupla
               </button>
-            ) : isAthlete ? (
+            )}
+            {(isAthlete || !user) && (
               <button
-                onClick={() => setActiveTab('grupos')}
-                className="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 flex items-center whitespace-nowrap"
+                onClick={() => {
+                  if (!user) {
+                    // Open login modal or redirect to login
+                    alert('Faça login para se inscrever no torneio');
+                  } else {
+                    // Handle registration
+                    alert('Funcionalidade de inscrição será implementada em breve');
+                  }
+                }}
+                className="bg-gradient-to-r from-green-600 to-green-500 text-white px-4 py-3 rounded-lg hover:from-green-500 hover:to-green-400 flex items-center whitespace-nowrap font-semibold shadow-lg"
               >
-                <Eye className="mr-2" size={16} />
-                Ver Grupos
+                <Zap className="mr-2" size={16} />
+                Inscrever-se
               </button>
-            ) : null}
+            )}
           </div>
         </div>
 
