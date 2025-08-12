@@ -62,7 +62,6 @@ const TournamentDetail: React.FC = () => {
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'gerais');
   const [activeInfoTab, setActiveInfoTab] = useState('contato');
-  const [activeInfoTab, setActiveInfoTab] = useState('contato');
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (id) {
