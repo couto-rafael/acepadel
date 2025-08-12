@@ -1293,8 +1293,8 @@ const TournamentDetail: React.FC = () => {
                     </button>
                   </div>
                   <div className="flex items-center">
-                    <span>{tournament.city || 'São Paulo'}, {tournament.state || 'SP'}</span>
-                  </div>
+                    <Navigation className="mr-2" size={20} />
+                    <span>Sao Paulo/SP</span>
                   <div className="flex items-center">
                     <Calendar className="mr-2" size={20} />
                     <span>
