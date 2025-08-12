@@ -61,6 +61,7 @@ const TournamentDetail: React.FC = () => {
   const { user } = useAuth();
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'gerais');
+  const [activeInfoTab, setActiveInfoTab] = useState('contato');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -125,8 +126,6 @@ const TournamentDetail: React.FC = () => {
     { id: 'regras', name: 'Regras', icon: FileText },
     { id: 'faq', name: 'FAQ', icon: HelpCircle }
   ];
-
-  const [activeInfoTab, setActiveInfoTab] = useState('contato');
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR', {
