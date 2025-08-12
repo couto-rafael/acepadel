@@ -307,6 +307,7 @@ const TournamentDetail: React.FC = () => {
         title: tournament.name,
         text: `Confira este torneio de padel: ${tournament.name}`,
         url: window.location.href,
+      };
       // Ensure location object exists with default values
       if (!foundTournament.location || typeof foundTournament.location !== 'object') {
         foundTournament.location = { city: 'São Paulo', state: 'SP' };
