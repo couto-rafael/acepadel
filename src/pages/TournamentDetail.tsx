@@ -1295,6 +1295,7 @@ const TournamentDetail: React.FC = () => {
                   <div className="flex items-center">
                     <Navigation className="mr-2" size={20} />
                     <span>Sao Paulo/SP</span>
+                  </div>
                   <div className="flex items-center">
                     <Calendar className="mr-2" size={20} />
                     <span>
@@ -1308,7 +1309,6 @@ const TournamentDetail: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                    <MapPin className="mr-2" size={20} />
               </div>
               
               <div className="flex items-center">
