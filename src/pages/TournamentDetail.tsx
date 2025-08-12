@@ -348,7 +348,7 @@ const TournamentDetail: React.FC = () => {
     { id: 'inscritos', name: 'Inscritos', icon: Users },
     { id: 'grupos', name: 'Grupos', icon: Trophy },
     { id: 'jogos', name: 'Jogos', icon: Calendar },
-    { id: 'agenda', name: 'Agenda', icon: Clock },
+
     { id: 'resultados', name: 'Resultados', icon: Medal },
     { id: 'ao-vivo', name: 'Ao Vivo', icon: Play }
   ];
