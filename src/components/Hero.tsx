@@ -59,7 +59,7 @@ const Hero: React.FC<HeroProps> = ({ onSearchClick }) => {
               </span>
             </button>
             <button className="bg-transparent border-2 border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-dark-900 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl">
-              Acessar Rankings
+              Cadastro
             </button>
           </div>
           
