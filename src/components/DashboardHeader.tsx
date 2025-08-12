@@ -8,9 +8,10 @@ import {
   Users,
   Settings,
   LogOut,
-  Zap
+  ArrowUpRight
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { BubbleLogo } from './Hero';
 
 const DashboardHeader: React.FC = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -136,11 +137,10 @@ const DashboardHeader: React.FC = () => {
               className="flex items-center group"
             >
               <div className="relative mr-3">
-                <Zap size={28} className="text-accent-500 group-hover:text-primary-900 transition-colors" />
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary-900 rounded-full animate-pulse"></div>
+                <BubbleLogo size={28} className="text-accent-500 group-hover:text-primary-900 transition-colors" />
               </div>
               <span className="text-xl font-black bg-gradient-to-r from-primary-900 to-accent-500 bg-clip-text text-transparent">
-                AcePadel
+                Bubble
               </span>
             </button>
 

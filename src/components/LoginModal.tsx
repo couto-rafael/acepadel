@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Mail, Lock, Eye, EyeOff, User, Building2, Zap } from 'lucide-react';
+import { X, Mail, Lock, Eye, EyeOff, User, Building2 } from 'lucide-react';
 import { signIn, signUp } from '../lib/auth';
 import { useAuth } from '../contexts/AuthContext';
+import { BubbleLogo } from './Hero';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -240,11 +241,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
         <div className="flex items-center justify-center mb-6">
           <div className="relative mr-3">
-            <Zap size={32} className="text-accent-500" />
-            <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary-900 rounded-full animate-pulse"></div>
+            <BubbleLogo size={32} className="text-accent-500" />
           </div>
           <span className="text-2xl font-black bg-gradient-to-r from-primary-900 to-accent-500 bg-clip-text text-transparent">
-            AcePadel
+            Bubble
           </span>
         </div>
 

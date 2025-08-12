@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Menu, User, Zap } from 'lucide-react';
+import { Menu, User } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LoginModal from './LoginModal';
+import { BubbleLogo } from './Hero';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -40,11 +41,10 @@ const Navbar: React.FC = () => {
                 className="flex items-center font-black text-xl text-primary-900 hover:text-accent-500 transition-colors"
               >
                 <div className="relative mr-3">
-                  <Zap size={32} className="text-accent-500" />
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary-900 rounded-full animate-pulse"></div>
+                  <BubbleLogo size={32} className="text-accent-500" />
                 </div>
                 <span className="bg-gradient-to-r from-primary-900 to-accent-500 bg-clip-text text-transparent">
-                  AcePadel
+                  Bubble
                 </span>
               </button>
             </div>
