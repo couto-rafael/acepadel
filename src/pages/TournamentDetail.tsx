@@ -1300,7 +1300,6 @@ const TournamentDetail: React.FC = () => {
                     <span>
                       {new Date(tournament.startDate).toLocaleDateString('pt-BR', { 
                         day: 'numeric', 
-                    <MapPin className="mr-2" size={20} />
                         month: 'long' 
                       }).replace(' de ', ' ')}/{new Date(tournament.startDate).getFullYear().toString().slice(-2)} - {new Date(tournament.endDate).toLocaleDateString('pt-BR', { 
                         day: 'numeric', 
@@ -1309,6 +1308,7 @@ const TournamentDetail: React.FC = () => {
                     </span>
                   </div>
                 </div>
+                    <MapPin className="mr-2" size={20} />
               </div>
               
               <div className="flex items-center">
