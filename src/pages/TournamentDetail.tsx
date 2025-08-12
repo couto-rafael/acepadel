@@ -334,6 +334,14 @@ const TournamentDetail: React.FC = () => {
                       <Share2 size={20} />
                     </button>
                   </div>
+                  <div className="flex items-center ml-4 space-x-2">
+                    <button className="text-white hover:text-accent-500 transition-colors">
+                      <Heart size={20} />
+                    </button>
+                    <button className="text-white hover:text-accent-500 transition-colors">
+                      <Share2 size={20} />
+                    </button>
+                  </div>
                 </div>
 
                 <h1 className="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
@@ -354,6 +362,8 @@ const TournamentDetail: React.FC = () => {
                       <Calendar size={18} className="mr-2 text-accent-500" />
                       <span>
                         {new Date(tournament.startDate).toLocaleDateString('pt-BR')} - {new Date(tournament.endDate).toLocaleDateString('pt-BR')}
+                      </span>
+                    </div>
                       </span>
                     </div>
                   </div>
@@ -377,13 +387,6 @@ const TournamentDetail: React.FC = () => {
                       </button>
                     ) : null}
                   </div>
-                </div>
-              </div>
-
-              {tournament.profileImage && (
-                <div className="mt-6 md:mt-0 md:ml-8">
-                  <img
-                    src={tournament.profileImage}
                     alt={tournament.name}
                     className="w-32 h-32 rounded-xl object-cover border-4 border-accent-500 shadow-xl"
                   />
@@ -416,26 +419,26 @@ const TournamentDetail: React.FC = () => {
               })}
             </nav>
           </div>
-        </div>
 
-        {/* Tournament Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {renderTabContent()}
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="bg-gradient-to-br from-dark-900 via-primary-900 to-dark-900 text-white py-16 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <div className="flex items-center mb-6">
-                <div className="relative mr-3">
-                  <Zap size={32} className="text-accent-500" />
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-accent-500 rounded-full animate-pulse"></div>
-                </div>
-                <span className="text-2xl font-black bg-gradient-to-r from-white to-accent-500 bg-clip-text text-transparent">
-                  AcePadel
+                  <div className="flex items-center space-x-3 mt-4 md:mt-0">
+                    {isOwner ? (
+                      <button
+                        onClick={handleEditTournament}
+                        className="bg-gradient-to-r from-accent-500 to-accent-400 text-dark-900 px-6 py-3 rounded-lg hover:from-accent-400 hover:to-accent-300 transition-all duration-300 flex items-center font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                      >
+                        <Edit2 size={18} className="mr-2" />
+                        Editar
+                      </button>
+                    ) : isAthlete && tournament.status === 'open' ? (
+                      <button
+                        onClick={handleRegisterTournament}
+                        className="bg-gradient-to-r from-primary-600 to-primary-500 text-white px-6 py-3 rounded-lg hover:from-primary-500 hover:to-primary-400 transition-all duration-300 flex items-center font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                      >
+                        <UserPlus size={18} className="mr-2" />
+                        Inscrever-se
+                      </button>
+                    ) : null}
+                  </div>
                 </span>
               </div>
               <p className="text-gray-300 mb-6 leading-relaxed">
